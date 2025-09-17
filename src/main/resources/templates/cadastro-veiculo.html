@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Veículo</title>
+  <link rel="stylesheet" href="/css/veiculo-form.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="card">
+      <div class="header">
+        <h1>Cadastro de Veículo</h1>
+        <p>Preencha os dados do veículo e selecione o cliente associado</p>
+      </div>
+
+      <!-- Note: enctype para upload de foto -->
+      <form th:action="@{/veiculos/salvar}" th:object="${veiculo}" method="post" enctype="multipart/form-data" class="form">
+        
+        <input type="hidden" th:field="*{id}"/>
+
+        <div>
+          <label class="label">Marca</label>
+          <input type="text" th:field="*{marca}" class="input" required>
+        </div>
+        <div>
+          <label class="label">Modelo</label>
+          <input type="text" th:field="*{modelo}" class="input" required>
+        </div>
+        <div>
+          <label class="label">Ano</label>
+          <input type="text" th:field="*{ano}" maxlength="4" class="input" required>
+        </div>
+        <div>
+          <label class="label">Placa</label>
+          <input type="text" th:field="*{placa}" maxlength="7" class="input" required>
+        </div>
+        <div>
+          <label class="label">Status</label>
+          <select th:field="*{status}" class="input" required>
+            <option value="EM_MANUTENCAO">Em manutenção</option>
+            <option value="MANUTENCAO_FINALIZADA">Manutenção Finalizada</option>
+            <option value="AGUARDANDO_PECA">Aguardando Peça</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Cliente</label>
+          <select th:field="*{cliente.id}" class="input" required>
+            <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome}"></option>
+          </select>
+        </div>
+
+        <!-- Upload de foto -->
+        <div>
+          <label class="label">Foto do Veículo</label>
+          <input type="file" name="foto" class="input" accept="image/*">
+          <div th:if="${veiculo.caminhoFoto != null}" style="margin-top:8px;">
+              <img th:src="@{'/uploads/veiculos/' + ${veiculo.caminhoFoto}}" alt="Foto do veículo" style="max-width:200px; border-radius:8px;">
+          </div>
+        </div>
+
+        <button type="submit" class="button">Salvar Veículo</button>
+      </form>
+
+      <div class="footer">
+        <p>Sistema de Gestão de Mecânica - 2025</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

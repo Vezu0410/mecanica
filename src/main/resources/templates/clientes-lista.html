@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clientes Cadastrados</title>
+  <link rel="stylesheet" th:href="@{/css/tabela-clientes.css}" />
+  <style>
+    /* Oculta a coluna de ID */
+    .table th.id-col, .table td.id-col {
+      display: none;
+    }
+
+    /* Cursor de clique para a linha */
+    .table tbody tr {
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .table tbody tr:hover {
+      background: rgba(34, 197, 94, 0.08);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="card">
+      <header class="header">
+        <h1>Clientes Cadastrados</h1>
+        <p>Lista de clientes registrados na Garagem AutoBot</p>
+      </header>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="id-col">ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Cidade</th>
+            <th>Data Cadastro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="cliente : ${clientes}" 
+              th:onclick="'window.location.href=\'/clientes/editar/' + ${cliente.id} + '\';'">
+            <td class="id-col" th:text="${cliente.id}"></td>
+            <td th:text="${cliente.nome}"></td>
+            <td th:text="${cliente.cpf}"></td>
+            <td th:text="${cliente.email}"></td>
+            <td th:text="${cliente.telefone}"></td>
+            <td th:text="${cliente.cidade}"></td>
+            <td th:text="${#temporals.format(cliente.dataCadastro, 'dd/MM/yyyy')}"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footer">
+        © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Garagem AutoBot
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Peças</title>
+    <link rel="stylesheet" th:href="@{/css/lista-pecas.css}">
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="card">
+        <div class="header">
+            <h1>Estoque de Peças</h1>
+            <p>Lista de todas as peças cadastradas</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Código</th>
+                    <th>Quantidade</th>
+                    <th>Preço Unitário (R$)</th>
+                    <th>Data Cadastro</th>
+                </tr>
+            </thead>
+			<tbody>
+			    <tr th:each="peca : ${pecas}"
+			        th:onclick="'window.location.href=\'/pecas/editar/' + ${peca.id} + '\';'"
+			        style="cursor: pointer;">
+			        <td th:text="${peca.nome}">Nome da peça</td>
+			        <td th:text="${peca.codigo}">Código</td>
+			        <td th:text="${peca.quantidade}">0</td>
+			        <td th:text="${peca.precoUnitarioFormatado}">0,00</td>
+			        <td th:text="${peca.dataCadastro}">01/01/2025 12:00</td>
+			    </tr>
+			</tbody>
+        </table>
+        <div class="footer">
+            <a th:href="@{/pecas/cadastro}" class="button">Cadastrar nova peça</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

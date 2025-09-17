@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Peça</title>
+    <link rel="stylesheet" th:href="@{/css/cadastro-peca.css}">
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="card">
+        <div class="header">
+            <h1>Cadastro de Peça</h1>
+            <p>Adicione ou edite peças do estoque</p>
+        </div>
+
+        <form th:action="@{/pecas/salvar}" th:object="${peca}" method="post" class="form">
+            <input type="hidden" th:field="*{id}"/>
+
+            <div>
+                <label for="nome" class="label">Nome da Peça</label>
+                <input type="text" th:field="*{nome}" id="nome" class="input" required>
+            </div>
+
+            <div>
+                <label for="codigo" class="label">Código</label>
+                <input type="text" th:field="*{codigo}" id="codigo" class="input" required>
+            </div>
+
+            <div>
+                <label for="quantidade" class="label">Quantidade</label>
+                <input type="number" th:field="*{quantidade}" id="quantidade" class="input" min="0" required>
+            </div>
+
+            <div>
+                <label for="precoUnitario" class="label">Preço Unitário (R$)</label>
+                <input type="number" step="0.01" th:field="*{precoUnitario}" id="precoUnitario" class="input" min="0" required>
+            </div>
+
+            <button type="submit" class="button">Salvar Peça</button>
+        </form>
+
+        <div class="footer">
+            <p><a th:href="@{/pecas/lista}" style="color:var(--accent);text-decoration:none;">Voltar para lista de peças</a></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

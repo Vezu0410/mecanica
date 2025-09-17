@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Veículos</title>
+  <link rel="stylesheet" th:href="@{/css/veiculo-tabela.css}">
+  <style>
+	
+	
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #1e293b;
+      color: var(--accent);
+    }
+    tr:nth-child(even) {
+      background: rgba(255,255,255,0.02);
+    }
+    .foto-thumb {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .foto-thumb:hover {
+      transform: scale(1.1);
+    }
+	/* Esconde a primeira coluna (ID) */
+	table th:first-child,
+	table td:first-child {
+	  display: none;
+	}
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+  <div class="card">
+    <div class="header">
+      <h1>Lista de Veículos</h1>
+      <p>Todos os veículos cadastrados no sistema</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Foto</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Ano</th>
+          <th>Placa</th>
+          <th>Status</th>
+          <th>Cliente</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="veiculo : ${veiculos}">
+          <td th:text="${veiculo.id}"></td>
+          <td>
+            <a th:if="${veiculo.caminhoFoto != null}" 
+               th:href="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}" target="_blank">
+              <img th:src="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}" 
+                   alt="Foto do veículo" class="foto-thumb">
+            </a>
+            <span th:if="${veiculo.caminhoFoto == null}">Sem foto</span>
+          </td>
+          <td th:text="${veiculo.marca}"></td>
+          <td th:text="${veiculo.modelo}"></td>
+          <td th:text="${veiculo.ano}"></td>
+          <td th:text="${veiculo.placa}"></td>
+          <td th:text="${veiculo.status}"></td>
+          <td th:text="${veiculo.cliente.nome}"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <p><a th:href="@{/veiculos/cadastro}" style="color: var(--accent);">Cadastrar novo veículo</a></p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

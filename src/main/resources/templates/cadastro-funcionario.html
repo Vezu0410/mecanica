@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Funcionário</title>
+    <link rel="stylesheet" th:href="@{/css/funcionario.css}">
+</head>
+<body>
+<div class="cadastro-wrapper">
+    <div class="card">
+        <div class="header">
+            <h1>Cadastro de Funcionário</h1>
+            <p>Preencha os dados abaixo</p>
+        </div>
+
+        <form th:action="@{/funcionarios/salvar}" th:object="${funcionario}" method="post" class="form">
+            <label class="label" for="nome">Nome</label>
+            <input type="text" th:field="*{nome}" id="nome" class="input" required>
+
+            <label class="label" for="cpf">CPF</label>
+            <input type="text" th:field="*{cpf}" id="cpf" class="input" required>
+
+            <label class="label" for="senha">Senha</label>
+            <input type="password" th:field="*{senha}" id="senha" class="input" required>
+
+            <label class="label" for="email">Email</label>
+            <input type="email" th:field="*{email}" id="email" class="input">
+
+            <label class="label" for="idade">Idade</label>
+            <input type="number" th:field="*{idade}" id="idade" class="input">
+
+            <label class="label" for="cep">CEP</label>
+            <input type="text" th:field="*{cep}" id="cep" class="input">
+
+            <button type="submit" class="button">Cadastrar</button>
+        </form>
+
+        <div th:if="${successMessage}" class="success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="error" th:text="${errorMessage}"></div>
+
+        <div class="footer">
+            <p>Garagem AutoBot &copy; 2025</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

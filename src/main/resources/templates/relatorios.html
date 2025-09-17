@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatórios da Oficina</title>
+    <link rel="stylesheet" th:href="@{/css/lista-pecas.css}">
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="card">
+        <div class="header">
+            <h1>Relatórios da Oficina</h1>
+            <p>Resumo de peças e veículos cadastrados</p>
+        </div>
+
+        <!-- Filtro de peças -->
+        <form method="get" th:action="@{/relatorios}" style="margin-bottom: 16px;">
+            <input type="text" name="searchPeca" placeholder="Pesquisar peça..." th:value="${searchPeca}" class="input">
+            <button type="submit" class="button" style="width:auto;margin-left:8px;">Buscar</button>
+        </form>
+
+        <h2>Peças</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Código</th>
+                    <th>Quantidade</th>
+                    <th>Preço Unitário (R$)</th>
+                    <th>Valor Total (R$)</th>
+                    <th>Data Cadastro</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${pecas}">
+                    <td th:text="${p.nome}"></td>
+                    <td th:text="${p.codigo}"></td>
+                    <td th:text="${p.quantidade}"></td>
+                    <td th:text="${p.precoUnitario}"></td>
+                    <td th:text="${p.valorTotal}"></td>
+                    <td th:text="${p.dataCadastro}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Filtro de veículos -->
+        <form method="get" th:action="@{/relatorios}" style="margin-top: 24px; margin-bottom: 16px;">
+            <input type="text" name="searchVeiculo" placeholder="Pesquisar veículo..." th:value="${searchVeiculo}" class="input">
+            <button type="submit" class="button" style="width:auto;margin-left:8px;">Buscar</button>
+        </form>
+
+        <h2>Veículos</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Ano</th>
+                    <th>Placa</th>
+                    <th>Status</th>
+                    <th>Cliente</th>
+                    <th>Data Cadastro</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="v : ${veiculos}">
+                    <td th:text="${v.marca}"></td>
+                    <td th:text="${v.modelo}"></td>
+                    <td th:text="${v.ano}"></td>
+                    <td th:text="${v.placa}"></td>
+                    <td th:text="${v.status}"></td>
+                    <td th:text="${v.cliente}"></td>
+                    <td th:text="${v.dataCadastro}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

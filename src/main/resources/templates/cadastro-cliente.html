@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro / Edição de Cliente</title>
+  <link rel="stylesheet" th:href="@{/css/cliente.css}" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="card" role="dialog" aria-labelledby="title">
+      <header class="header">
+        <h1 id="title" th:text="${cliente.id != null} ? 'Editar Cliente' : 'Novo Cliente'"></h1>
+        <p th:text="${cliente.id != null} ? 'Atualize os dados do cliente' : 'Preencha os dados para cadastrar um cliente'"></p>
+      </header>
+
+      <form th:action="@{/clientes/salvar}" th:object="${cliente}" method="post" class="form">
+        <!-- Campo escondido para ID -->
+        <input type="hidden" th:field="*{id}" />
+
+        <div>
+          <label for="nome" class="label">Nome</label>
+          <input id="nome" type="text" th:field="*{nome}" class="input" required />
+        </div>
+
+        <div>
+          <label for="cpf" class="label">CPF</label>
+          <!-- CPF readonly somente se for edição -->
+          <input id="cpf" type="text" th:field="*{cpf}" class="input"
+                 th:attr="readonly=${cliente.id != null}" minlength="11" maxlength="11" required />
+        </div>
+
+        <div>
+          <label for="email" class="label">E-mail</label>
+          <input id="email" type="email" th:field="*{email}" class="input" required />
+        </div>
+
+        <div>
+          <label for="telefone" class="label">Telefone</label>
+          <input id="telefone" type="text" th:field="*{telefone}" class="input" />
+        </div>
+
+        <div>
+          <label for="cep" class="label">CEP</label>
+          <input id="cep" type="text" th:field="*{cep}" class="input" />
+        </div>
+
+        <div>
+          <label for="endereco" class="label">Endereço</label>
+          <input id="endereco" type="text" th:field="*{endereco}" class="input" />
+        </div>
+
+        <div>
+          <label for="cidade" class="label">Cidade</label>
+          <input id="cidade" type="text" th:field="*{cidade}" class="input" />
+        </div>
+
+        <div>
+          <label for="estado" class="label">Estado</label>
+          <input id="estado" type="text" th:field="*{estado}" class="input" />
+        </div>
+
+        <button type="submit" class="button" th:text="${cliente.id != null} ? 'Salvar Alterações' : 'Cadastrar Cliente'"></button>
+
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+        <div th:if="${message}" class="success" th:text="${message}"></div>
+      </form>
+
+      <div class="footer">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Garagem AutoBot</div>
+    </div>
+  </div>
+</body>
+</html>

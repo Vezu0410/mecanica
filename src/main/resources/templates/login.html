@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login • Oficina Mecânica</title>
+  <link rel="stylesheet" th:href="@{/css/login.css}" />
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="card" role="dialog" aria-labelledby="title">
+      <header class="header">
+        <h1 id="title">Entrar</h1>
+        <p>Acesse o sistema Garagem Autobot</p>
+      </header>
+
+      <!-- formulário Thymeleaf -->
+      <form th:action="@{/login}" th:object="${loginForm}" method="post" class="form" novalidate>
+        <div class="row">
+          <label for="cpf" class="label">CPF</label>
+          <input id="cpf"
+                 type="text"
+                 th:field="*{cpf}"
+                 class="input"
+                 placeholder="Digite seu CPF"
+                 minlength="11" maxlength="11"
+                 required />
+        </div>
+
+        <div class="row">
+          <label for="senha" class="label">Senha</label>
+          <input id="senha"
+                 type="password"
+                 th:field="*{senha}"
+                 class="input"
+                 placeholder="••••••••"
+                 minlength="6"
+                 required />
+        </div>
+
+        <button type="submit" class="button">Entrar</button>
+
+        <!-- Mensagem de erro enviada pelo controller -->
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+
+        <!-- Mensagem de sucesso (opcional) -->
+        <div th:if="${message}" class="success" th:text="${message}"></div>
+      </form>
+
+      <div class="footer">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Garagem AutoBot</div>
+    </div>
+  </div>
+</body>
+</html>
