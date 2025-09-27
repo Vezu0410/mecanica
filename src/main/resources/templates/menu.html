@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Gestão de Mecânica</title>
+  <link rel="stylesheet" th:href="@{/css/menu.css}" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">GarageAutoBot</div>
+    <a th:href="@{/menu}">Início</a>
+    <a th:href="@{/clientes/listar}">Clientes</a>
+    <a th:href="@{/veiculos/lista}">Veículos</a>
+    <a th:href="@{/servicos}">Serviços</a>
+    <a th:href="@{/estoque}">Estoque</a>
+  </div>
+
+  <!-- Conteúdo principal -->
+  <div class="main-content">
+    <div class="card-grid">
+      <div class="card" th:each="veiculo : ${veiculos}">
+        <h2 th:text="${veiculo.marca + ' ' + veiculo.modelo}"></h2>
+        <p>Status: <span th:text="${veiculo.status}"></span></p>
+        <p>Cliente: <span th:text="${veiculo.cliente.nome}"></span></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
