@@ -27,21 +27,29 @@ body {
   background: var(--card);
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  gap: 15px;
+  align-items: center; /* Centraliza todos os elementos dentro */
+  padding: 24px 20px;
+  gap: 18px;
   position: fixed;
   height: 100vh;
   border-right: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 2px 0 10px rgba(0,0,0,0.3); /* Sombra moderna */
   z-index: 10;
 }
 
+/* Logo mais bonito e centralizado visualmente */
 .sidebar .logo {
-  font-size: 1.6rem;
-  font-weight: bold;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--accent);
-  margin-bottom: 25px;
-  text-align: center;
-  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .sidebar a {
@@ -51,6 +59,8 @@ body {
   border-radius: 8px;
   transition: background 0.2s, color 0.2s, padding-left 0.2s;
   font-weight: 500;
+  width: 100%;
+  text-align: left;
 }
 
 .sidebar a:hover {
@@ -61,7 +71,7 @@ body {
 
 /* Conteúdo principal respeitando a sidebar */
 .main-content {
-  margin-left: 220px; /* espaço para a sidebar */
+  margin-left: 220px;
   padding: 30px;
   width: calc(100% - 220px);
 }
@@ -69,14 +79,14 @@ body {
 /* GRID DE CARDS - lado a lado */
 .card-grid {
   display: flex;
-  flex-wrap: wrap;         /* quebra de linha se necessário */
-  gap: 12px;               /* espaço entre os cards */
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: flex-start;
 }
 
 /* CARDS PEQUENOS */
 .card {
-  width: 200px;            /* tamanho fixo pequeno */
+  width: 200px;
   background: var(--card);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 10px;
@@ -107,19 +117,19 @@ body {
   top: 8px;
   right: 8px;
   cursor: pointer;
-  font-size: 20px;          /* maior ícone */
-  padding: 6px;             /* aumenta área clicável */
+  font-size: 20px;
+  padding: 6px;
   border-radius: 6px;
   transition: background 0.2s;
 }
 
 .options-menu:hover {
-  background: rgba(34, 197, 94, 0.2); /* efeito hover visível */
+  background: rgba(34, 197, 94, 0.2);
 }
 
 /* DROPDOWN DE STATUS */
 .status-dropdown {
-  display: none;            /* aparece ao passar mouse no menu */
+  display: none;
   position: absolute;
   top: 30px;
   right: 0;
@@ -135,9 +145,9 @@ body {
 }
 
 .status-dropdown select {
-  width: 180px;            /* maior largura para clicar fácil */
-  padding: 6px 8px;        /* mais espaço interno */
-  font-size: 0.9rem;       /* fonte maior */
+  width: 180px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
   background: var(--bg);
   color: var(--fg);
   border: 1px solid rgba(255,255,255,0.3);

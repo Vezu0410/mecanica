@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Clientes Cadastrados</title>
   <link rel="stylesheet" th:href="@{/css/tabela-clientes.css}" />
+  <link rel="stylesheet" href="/css/sidebar.css">
   <style>
     /* Oculta a coluna de ID */
     .table th.id-col, .table td.id-col {
@@ -23,12 +24,16 @@
   </style>
 </head>
 <body>
+	<div th:replace="fragments/sidebar :: sidebar"></div>
   <div class="page-wrapper">
     <div class="card">
-      <header class="header">
-        <h1>Clientes Cadastrados</h1>
-        <p>Lista de clientes registrados na Garagem AutoBot</p>
-      </header>
+		<header class="header">
+		  <div class="header-content">
+		    <h1>Clientes Cadastrados</h1>
+		    <a href="http://localhost:8080/clientes/cadastrar" class="btn-cadastrar">+ Cadastrar Novo</a>
+		  </div>
+		  <p>Lista de clientes registrados na Garagem AutoBot</p>
+		</header>
 
       <table class="table">
         <thead>

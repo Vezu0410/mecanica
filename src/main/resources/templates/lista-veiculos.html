@@ -2,28 +2,26 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Lista de Veículos</title>
   <link rel="stylesheet" th:href="@{/css/veiculo-tabela.css}">
+  <link rel="stylesheet" href="/css/sidebar.css">
   <style>
-	
-	
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
+    /* Oculta a primeira coluna (ID) */
+    table th:first-child,
+    table td:first-child {
+      display: none;
     }
-    th, td {
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 10px;
-      text-align: left;
+
+    /* Cursor de clique para a linha */
+    table tbody tr {
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    th {
-      background: #1e293b;
-      color: var(--accent);
+
+    table tbody tr:hover {
+      background: rgba(34, 197, 94, 0.08);
     }
-    tr:nth-child(even) {
-      background: rgba(255,255,255,0.02);
-    }
+
+    /* Fotos */
     .foto-thumb {
       width: 80px;
       height: 60px;
@@ -32,62 +30,101 @@
       cursor: pointer;
       transition: transform 0.2s;
     }
+
     .foto-thumb:hover {
       transform: scale(1.1);
     }
-	/* Esconde a primeira coluna (ID) */
-	table th:first-child,
-	table td:first-child {
-	  display: none;
-	}
+
+    /* Header estilo clientes */
+    .header-content {
+      display: flex;
+      justify-content: space-between; /* botão à direita */
+      align-items: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color:  #ffffff;;
+      text-align: center;
+      flex: 1;
+    }
+
+    .header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    .btn-cadastrar {
+      background: var(--accent);
+      color: var(--card);
+      padding: 10px 18px;
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .btn-cadastrar:hover {
+      background: transparent;
+      color: var(--accent);
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
-<div class="page-wrapper">
-  <div class="card">
-    <div class="header">
-      <h1>Lista de Veículos</h1>
-      <p>Todos os veículos cadastrados no sistema</p>
-    </div>
+  <div th:replace="fragments/sidebar :: sidebar"></div>
+  <div class="page-wrapper">
+    <div class="card">
+      <header class="header">
+        <div class="header-content">
+          <h1>Lista Veículos</h1>
+          <a href="http://localhost:8080/veiculos/cadastro" class="btn-cadastrar">+ Cadastrar Novo</a>
+        </div>
+        <p>Lista de veículos registrados na Garagem AutoBot</p>
+      </header>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Foto</th>
-          <th>Marca</th>
-          <th>Modelo</th>
-          <th>Ano</th>
-          <th>Placa</th>
-          <th>Status</th>
-          <th>Cliente</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr th:each="veiculo : ${veiculos}">
-          <td th:text="${veiculo.id}"></td>
-          <td>
-            <a th:if="${veiculo.caminhoFoto != null}" 
-               th:href="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}" target="_blank">
-              <img th:src="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}" 
-                   alt="Foto do veículo" class="foto-thumb">
-            </a>
-            <span th:if="${veiculo.caminhoFoto == null}">Sem foto</span>
-          </td>
-          <td th:text="${veiculo.marca}"></td>
-          <td th:text="${veiculo.modelo}"></td>
-          <td th:text="${veiculo.ano}"></td>
-          <td th:text="${veiculo.placa}"></td>
-          <td th:text="${veiculo.status}"></td>
-          <td th:text="${veiculo.cliente.nome}"></td>
-        </tr>
-      </tbody>
-    </table>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Foto</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Ano</th>
+            <th>Placa</th>
+            <th>Status</th>
+            <th>Cliente</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="veiculo : ${veiculos}">
+            <td th:text="${veiculo.id}"></td>
+            <td>
+              <a th:if="${veiculo.caminhoFoto != null}" 
+                 th:href="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}" target="_blank">
+                <img th:src="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}" 
+                     alt="Foto do veículo" class="foto-thumb">
+              </a>
+              <span th:if="${veiculo.caminhoFoto == null}">Sem foto</span>
+            </td>
+            <td th:text="${veiculo.marca}"></td>
+            <td th:text="${veiculo.modelo}"></td>
+            <td th:text="${veiculo.ano}"></td>
+            <td th:text="${veiculo.placa}"></td>
+            <td th:text="${veiculo.status}"></td>
+            <td th:text="${veiculo.cliente.nome}"></td>
+          </tr>
+        </tbody>
+      </table>
 
-    <div class="footer">
-      <p><a th:href="@{/veiculos/cadastro}" style="color: var(--accent);">Cadastrar novo veículo</a></p>
+      <div class="footer">
+        © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Garagem AutoBot
+      </div>
     </div>
   </div>
-</div>
 </body>
 </html>
