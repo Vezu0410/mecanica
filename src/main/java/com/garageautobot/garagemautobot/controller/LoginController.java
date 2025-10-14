@@ -30,7 +30,7 @@ public class LoginController {
 
         if (funcionarioOpt.isPresent()) {
             model.addAttribute("message", "Login realizado com sucesso!");
-            return "home"; 
+            return "redirect:/menu"; 
         } else {
             model.addAttribute("error", "CPF ou senha inválidos");
             return "login";

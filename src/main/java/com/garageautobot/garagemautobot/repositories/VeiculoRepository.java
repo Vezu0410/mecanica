@@ -10,6 +10,13 @@ import java.util.List;
 public interface VeiculoRepository extends JpaRepository<Veiculo, Long> {
     List<Veiculo> findByClienteId(Long clienteId);
     List<Veiculo> findByPlacaContainingIgnoreCase(String placa);
-
+    List<Veiculo> findByStatus(StatusVeiculo status);
     List<Veiculo> findByStatusIn(List<StatusVeiculo> status);
+    
+    
+    
+    List<Veiculo> findByMarcaContainingIgnoreCaseOrModeloContainingIgnoreCaseOrClienteNomeContainingIgnoreCase(
+            String marca, String modelo, String clienteNome
+    );
+
 }

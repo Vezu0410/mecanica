@@ -46,5 +46,17 @@ public class VeiculoService {
             List.of(StatusVeiculo.EM_MANUTENCAO, StatusVeiculo.AGUARDANDO_PECA)
         );
     }
-    
+
+    public List<Veiculo> findByStatus(StatusVeiculo status) {
+        return veiculoRepository.findByStatus(status);
+    }
+
+    public List<Veiculo> search(String termo) {
+        return veiculoRepository.findByMarcaContainingIgnoreCaseOrModeloContainingIgnoreCaseOrClienteNomeContainingIgnoreCase(
+                termo, termo, termo
+        );
+    }
+
+
 }
+ 	

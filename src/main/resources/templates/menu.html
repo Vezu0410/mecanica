@@ -12,15 +12,55 @@
     <a th:href="@{/menu}">Início</a>
     <a th:href="@{/clientes/listar}">Clientes</a>
     <a th:href="@{/veiculos/lista}">Veículos</a>
-    <a th:href="@{/servicos}">Serviços</a>
+    <a th:href="@{/relatorios}">Serviços</a>
     <a th:href="@{/estoque}">Estoque</a>
   </div>
 
   <!-- Conteúdo principal -->
   <div class="main-content">
+    
+    <!-- 🔹 Filtros -->
+    <div class="filters" style="display: flex; gap: 12px; margin-bottom: 20px;">
+      
+      <!-- Filtro de status -->
+      <form th:action="@{/menu}" method="get">
+        <select name="status" onchange="this.form.submit()" style="padding:6px; border-radius:6px; border:1px solid #1e293b;">
+          <option th:value="TODOS" th:selected="${status == null or status == 'TODOS'}">Todos</option>
+          <option th:value="EM_MANUTENCAO" th:selected="${status == 'EM_MANUTENCAO'}">Em Manutenção</option>
+          <option th:value="AGUARDANDO_PECA" th:selected="${status == 'AGUARDANDO_PECA'}">Aguardando Peça</option>
+          <option th:value="MANUTENCAO_FINALIZADA" th:selected="${status == 'MANUTENCAO_FINALIZADA'}">Finalizado</option>
+        </select>
+      </form>
+
+      <!-- Pesquisa -->
+      <form th:action="@{/menu}" method="get" style="flex:1; display:flex;">
+        <input type="text" name="search" th:value="${search}" placeholder="Pesquisar por marca, modelo ou cliente" 
+               style="flex:1; padding:6px; border-radius:6px; border:1px solid #ccc;" />
+        <button type="submit" style="padding:6px 12px; margin-left:6px; border-radius:6px; background:var(--accent); color:white; border:none;">Buscar</button>
+      </form>
+
+    </div>
+
+    <!-- 🔹 Lista de carros -->
     <div class="card-grid">
       <div class="card" th:each="veiculo : ${veiculos}">
-        <h2 th:text="${veiculo.marca + ' ' + veiculo.modelo}"></h2>
+        <div class="card-header">
+          <h2 th:text="${veiculo.marca + ' ' + veiculo.modelo}"></h2>
+          <div class="options-menu">
+            ⋮
+            <div class="status-dropdown">
+              <form th:action="@{'/veiculos/' + ${veiculo.id} + '/status'}" method="post">
+                <select name="novoStatus" class="dropdown-status" onchange="this.form.submit()">
+                  <option disabled selected>Alterar status</option>
+                  <option th:value="EM_MANUTENCAO">Em Manutenção</option>
+                  <option th:value="AGUARDANDO_PECA">Aguardando Peça</option>
+                  <option th:value="MANUTENCAO_FINALIZADA">Finalizado</option>
+                </select>
+              </form>
+            </div>
+          </div>
+        </div>
+
         <p>Status: <span th:text="${veiculo.status}"></span></p>
         <p>Cliente: <span th:text="${veiculo.cliente.nome}"></span></p>
       </div>

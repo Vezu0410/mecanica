@@ -19,10 +19,9 @@ body {
   background: var(--bg);
   color: var(--fg);
   min-height: 100vh;
-  display: flex;
 }
 
-/* Sidebar estilo mais profissional */
+/* Sidebar fixa e profissional */
 .sidebar {
   width: 220px;
   background: var(--card);
@@ -33,6 +32,7 @@ body {
   position: fixed;
   height: 100vh;
   border-right: 1px solid rgba(255,255,255,0.1);
+  z-index: 10;
 }
 
 .sidebar .logo {
@@ -59,44 +59,88 @@ body {
   padding-left: 18px;
 }
 
-/* Conteúdo principal */
+/* Conteúdo principal respeitando a sidebar */
 .main-content {
-  margin-left: 220px;
+  margin-left: 220px; /* espaço para a sidebar */
   padding: 30px;
   width: calc(100% - 220px);
 }
 
-/* Cards estilo tabela */
+/* GRID DE CARDS - lado a lado */
 .card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-  align-items: start;
+  display: flex;
+  flex-wrap: wrap;         /* quebra de linha se necessário */
+  gap: 12px;               /* espaço entre os cards */
+  justify-content: flex-start;
 }
 
+/* CARDS PEQUENOS */
 .card {
-  background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(0,0,0,0.15));
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 6px 15px var(--shadow);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 200px;            /* tamanho fixo pequeno */
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 10px var(--shadow);
+  position: relative;
+  transition: transform 0.2s;
 }
 
 .card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 25px var(--shadow);
+  transform: translateY(-4px);
 }
 
 .card h2 {
-  margin-bottom: 6px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--fg);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
 }
 
 .card p {
-  margin: 4px 0;
+  font-size: 0.8rem;
   color: var(--muted);
-  font-size: 0.85rem;
+  margin: 3px 0;
+}
+
+/* MENU DOS 3 PONTOS */
+.options-menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+  font-size: 20px;          /* maior ícone */
+  padding: 6px;             /* aumenta área clicável */
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.options-menu:hover {
+  background: rgba(34, 197, 94, 0.2); /* efeito hover visível */
+}
+
+/* DROPDOWN DE STATUS */
+.status-dropdown {
+  display: none;            /* aparece ao passar mouse no menu */
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 6px;
+  border-radius: 6px;
+  z-index: 5;
+}
+
+.options-menu:hover .status-dropdown {
+  display: block;
+}
+
+.status-dropdown select {
+  width: 180px;            /* maior largura para clicar fácil */
+  padding: 6px 8px;        /* mais espaço interno */
+  font-size: 0.9rem;       /* fonte maior */
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 6px;
+  cursor: pointer;
 }
