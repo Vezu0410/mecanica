@@ -63,7 +63,7 @@ public class ClienteController {
         } catch (Exception e) {
             model.addAttribute("error", "Erro ao salvar cliente: " + e.getMessage());
         }
-        return "cadastro-cliente";
+        return "redirect:/clientes/listar";
     }
     @GetMapping("/listar")
     public String listarClientes(Model model) {

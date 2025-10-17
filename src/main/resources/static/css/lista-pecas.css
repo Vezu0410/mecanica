@@ -34,8 +34,16 @@ html, body {
 
 /* Header */
 .header {
-  margin-bottom: 16px;
+  margin-bottom: center;
 }
+
+
+.header h1 {
+  margin: 0 auto;
+  text-align: center;
+  display: block;
+}
+
 
 .header-top {
   position: relative;
@@ -43,16 +51,6 @@ html, body {
   justify-content: center; /* Centraliza o TEXTO */
   align-items: center;
 }
-
-.header-top h1 {
-  flex: 1;
-  text-align: center;
-  margin: 0;
-  font-size: 1.6rem;
-  position: relative;
-  left: 80px; /* Ajuste fino para a direita — pode mudar para 10px, 20px... */
-}
-
 
 .header p {
   margin-top: 6px;
