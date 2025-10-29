@@ -52,6 +52,16 @@
           </select>
         </div>
 
+		<div class="form-group">
+		    <label for="peca">Peça utilizada</label>
+		    <select id="peca" name="peca.id" class="form-control">
+		        <option value="">Selecione uma peça</option>
+		        <th:block th:each="peca : ${pecas}">
+		            <option th:value="${peca.id}" th:text="${peca.nome}"></option>
+		        </th:block>
+		    </select>
+		</div>
+		
         <!-- Upload de foto -->
         <div>
           <label class="label">Foto do Veículo</label>

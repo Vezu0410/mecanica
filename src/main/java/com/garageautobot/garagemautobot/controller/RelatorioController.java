@@ -51,8 +51,6 @@ public class RelatorioController {
                     map.put("dataCadastro", p.getDataCadastro().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
                     return map;
                 }).collect(Collectors.toList());
-
-        // Lista de veículos filtrados
         List<Map<String, Object>> veiculos = veiculoService.findAll().stream()
                 .filter(v -> searchVeiculo == null || searchVeiculo.isEmpty() ||
                         v.getMarca().toLowerCase().contains(searchVeiculo.toLowerCase()) ||

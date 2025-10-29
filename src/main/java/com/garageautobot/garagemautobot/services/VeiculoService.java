@@ -51,6 +51,19 @@ public class VeiculoService {
         return veiculoRepository.findByStatus(status);
     }
 
+    public List<Veiculo> buscarPorStatus(String status) {
+        if (status == null || status.equals("TODOS")) {
+            return veiculoRepository.findAll();
+        }
+
+        try {
+            StatusVeiculo statusEnum = StatusVeiculo.valueOf(status);
+            return veiculoRepository.findByStatus(statusEnum);
+        } catch (IllegalArgumentException e) {
+            return veiculoRepository.findAll();
+        }
+    }
+
     public List<Veiculo> search(String termo) {
         return veiculoRepository.findByMarcaContainingIgnoreCaseOrModeloContainingIgnoreCaseOrClienteNomeContainingIgnoreCase(
                 termo, termo, termo

@@ -3,6 +3,7 @@ package com.garageautobot.garagemautobot.controller;
 import com.garageautobot.garagemautobot.entities.Cliente;
 import com.garageautobot.garagemautobot.entities.Veiculo;
 import com.garageautobot.garagemautobot.repositories.ClienteRepository;
+import com.garageautobot.garagemautobot.services.PecaService;
 import com.garageautobot.garagemautobot.services.VeiculoService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,10 @@ public class VeiculoController {
     private final VeiculoService veiculoService;
     private final ClienteRepository clienteRepository;
 
+
+    @Autowired
+    private PecaService pecaService; // 🔹 Adicionado
+    
     @Autowired
     public VeiculoController(VeiculoService veiculoService, ClienteRepository clienteRepository) {
         this.veiculoService = veiculoService;
@@ -35,6 +40,7 @@ public class VeiculoController {
     public String exibirFormularioCadastro(Model model) {
         model.addAttribute("veiculo", new Veiculo()); // Veículo novo
         model.addAttribute("clientes", clienteRepository.findAll());
+        model.addAttribute("pecas", pecaService.findAll());
         return "cadastro-veiculo";
     }
 
@@ -45,6 +51,7 @@ public class VeiculoController {
                 .orElseThrow(() -> new RuntimeException("Veículo não encontrado"));
         model.addAttribute("veiculo", veiculo);
         model.addAttribute("clientes", clienteRepository.findAll());
+        model.addAttribute("pecas", pecaService.findAll()); // 🔹 Aqui também
         return "cadastro-veiculo"; // mesma página do cadastro
     }
 

@@ -2,6 +2,8 @@ package com.garageautobot.garagemautobot.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "veiculos")
@@ -37,6 +39,13 @@ public class Veiculo {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
+    @OneToMany(mappedBy = "veiculo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PecaUsada> pecasUsadas = new ArrayList<>();
+
+    public List<PecaUsada> getPecasUsadas() { return pecasUsadas; }
+    public void setPecasUsadas(List<PecaUsada> pecasUsadas) { this.pecasUsadas = pecasUsadas; }
+
+    
     public Veiculo() {}
 
     public Veiculo(String marca, String modelo, String ano, String placa, Cliente cliente) {

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Peças por Veículo</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Peças por Veículo</h1>
+
+    <div th:each="veiculo : ${veiculos}">
+        <h2 th:text="${veiculo.marca + ' ' + veiculo.modelo + ' - Cliente: ' + veiculo.cliente.nome}"></h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Peça</th>
+                    <th>Quantidade usada</th>
+                    <th>Valor unitário</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="vp : ${veiculo.pecasUsadas}">
+                    <td th:text="${vp.peca.nome}"></td>
+                    <td th:text="${vp.quantidadeUsada}"></td>
+                    <td th:text="${vp.peca.valor}"></td>
+                    <td th:text="${vp.quantidadeUsada * vp.peca.valor}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

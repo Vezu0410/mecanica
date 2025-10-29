@@ -4,7 +4,169 @@
   <meta charset="UTF-8">
   <title>Sistema de Gestão de Mecânica</title>
   <link rel="stylesheet" th:href="@{/css/menu.css}" />
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <style>
+    /* === Botão de Peça === */
+    .btn-peca {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    .btn-peca:hover {
+      background: #1d4ed8;
+    }
+
+    /* === Modal === */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: var(--bg);
+      padding: 20px;
+      border-radius: 10px;
+      min-width: 300px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .modal-content select, .modal-content input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #0f172a;
+    }
+
+    .modal-content button {
+      margin-right: 6px;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .modal-content button[type="submit"] {
+      background: #16a34a;
+      color: #0f172a;
+    }
+
+    .modal-content button[type="button"] {
+      background: #dc2626;
+      color: #0f172a;
+    }
+
+    /* === Filtros acima dos cards === */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .filters form {
+      display: flex;
+      flex: 1;
+      gap: 6px;
+    }
+
+    .filters select, .filters input {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: var(--card);
+      color: var(--fg);
+      font-size: 0.9rem;
+      flex: 1;
+    }
+
+    .filters button {
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .filters button:hover {
+      background: #1d4ed8;
+    }
+
+    /* GRID de cards responsivo */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .card-actions {
+      margin-top: 10px;
+    }
+
+    /* Ajustes gerais */
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 15px;
+      }
+
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        justify-content: space-around;
+      }
+
+      .sidebar .logo {
+        flex: 1 100%;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .sidebar a {
+        flex: 1 1 45%;
+        text-align: center;
+        margin-bottom: 6px;
+      }
+
+      .filters {
+        flex-direction: column;
+      }
+
+      .filters form {
+        flex-direction: column;
+      }
+
+      .filters button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <!-- Sidebar -->
   <div class="sidebar">
@@ -18,13 +180,11 @@
 
   <!-- Conteúdo principal -->
   <div class="main-content">
-    
-    <!-- 🔹 Filtros -->
-    <div class="filters" style="display: flex; gap: 12px; margin-bottom: 20px;">
-      
-      <!-- Filtro de status -->
+
+    <!-- 🔹 Filtros acima dos cards -->
+    <div class="filters">
       <form th:action="@{/menu}" method="get">
-        <select name="status" onchange="this.form.submit()" style="padding:6px; border-radius:6px; border:1px solid #1e293b;">
+        <select name="status" onchange="this.form.submit()">
           <option th:value="TODOS" th:selected="${status == null or status == 'TODOS'}">Todos</option>
           <option th:value="EM_MANUTENCAO" th:selected="${status == 'EM_MANUTENCAO'}">Em Manutenção</option>
           <option th:value="AGUARDANDO_PECA" th:selected="${status == 'AGUARDANDO_PECA'}">Aguardando Peça</option>
@@ -32,13 +192,10 @@
         </select>
       </form>
 
-      <!-- Pesquisa -->
-      <form th:action="@{/menu}" method="get" style="flex:1; display:flex;">
-        <input type="text" name="search" th:value="${search}" placeholder="Pesquisar por marca, modelo ou cliente" 
-               style="flex:1; padding:6px; border-radius:6px; border:1px solid #ccc;" />
-        <button type="submit" style="padding:6px 12px; margin-left:6px; border-radius:6px; background:var(--accent); color:white; border:none;">Buscar</button>
+      <form th:action="@{/menu}" method="get">
+        <input type="text" name="search" th:value="${search}" placeholder="Pesquisar por marca, modelo ou cliente"/>
+        <button type="submit">Buscar</button>
       </form>
-
     </div>
 
     <!-- 🔹 Lista de carros -->
@@ -50,7 +207,7 @@
             ⋮
             <div class="status-dropdown">
               <form th:action="@{'/veiculos/' + ${veiculo.id} + '/status'}" method="post">
-                <select name="novoStatus" class="dropdown-status" onchange="this.form.submit()">
+                <select name="novoStatus" onchange="this.form.submit()">
                   <option disabled selected>Alterar status</option>
                   <option th:value="EM_MANUTENCAO">Em Manutenção</option>
                   <option th:value="AGUARDANDO_PECA">Aguardando Peça</option>
@@ -63,8 +220,42 @@
 
         <p>Status: <span th:text="${veiculo.status}"></span></p>
         <p>Cliente: <span th:text="${veiculo.cliente.nome}"></span></p>
+
+        <!-- Botão para abrir modal -->
+        <div class="card-actions">
+          <button type="button" th:onclick="'abrirModal(' + ${veiculo.id} + ')'" class="btn-peca">⚙ Usar Peça</button>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal (fora do loop) -->
+  <div id="modalPeca" class="modal">
+    <div class="modal-content">
+      <h3>Adicionar Peça ao Veículo</h3>
+      <form id="formPeca" method="post">
+        <select name="pecaId" required>
+          <option value="" disabled selected>Selecione uma peça</option>
+          <option th:each="peca : ${pecas}" th:value="${peca.id}" th:text="${peca.nome + ' (' + peca.quantidade + ' unid.)'}"></option>
+        </select>
+        <input type="number" name="quantidadeUsada" min="1" placeholder="Quantidade usada" required>
+        <button type="submit">Confirmar</button>
+        <button type="button" onclick="fecharModal()">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function abrirModal(idVeiculo) {
+      const modal = document.getElementById('modalPeca');
+      modal.style.display = 'flex';
+      const form = document.getElementById('formPeca');
+      form.action = `/veiculos/${idVeiculo}/adicionar-peca`;
+    }
+
+    function fecharModal() {
+      document.getElementById('modalPeca').style.display = 'none';
+    }
+  </script>
 </body>
 </html>

@@ -2,6 +2,8 @@ package com.garageautobot.garagemautobot.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "pecas")
@@ -15,7 +17,7 @@ public class Peca {
     private String nome;
 
     @Column(nullable = false, unique = true)
-    private String codigo; // pode ser um código interno ou código de barras
+    private String codigo; 
 
     @Column(nullable = false)
     private int quantidade;
@@ -26,6 +28,13 @@ public class Peca {
     @Column(nullable = false)
     private LocalDateTime dataCadastro = LocalDateTime.now();
 
+    @OneToMany(mappedBy = "peca")
+    private List<PecaUsada> pecasUsadas = new ArrayList<>();
+
+    public List<PecaUsada> getPecasUsadas() { return pecasUsadas; }
+    public void setPecasUsadas(List<PecaUsada> pecasUsadas) { this.pecasUsadas = pecasUsadas; }
+
+    
     // Construtores
     public Peca() {}
 
