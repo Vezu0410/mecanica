@@ -5,7 +5,6 @@
     <title>Relatórios da Oficina</title>
     <link rel="stylesheet" th:href="@{/css/lista-pecas.css}">
 	<link rel="stylesheet" href="/css/sidebar.css">
-
 </head>
 <body>
 <div th:replace="fragments/sidebar :: sidebar"></div>
@@ -15,6 +14,12 @@
             <h1>Relatórios da Oficina</h1>
             <p>Resumo de peças e veículos cadastrados</p>
         </div>
+
+		<form th:action="@{/relatorios/pecas/pdf}" method="get" style="margin-bottom: 16px;">
+		    <button type="submit" class="button" style="background-color:#4CAF50;color:white;">
+		        📄 Gerar PDF das Peças
+		    </button>
+		</form>
 
         <!-- Filtro de peças -->
         <form method="get" th:action="@{/relatorios}" style="margin-bottom: 16px;">

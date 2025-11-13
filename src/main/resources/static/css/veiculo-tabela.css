@@ -51,6 +51,7 @@ html, body {
   text-align: center;
   z-index: 1;
   flex: 1;
+  pointer-events: none;
 }
 
 .header-content .btn-cadastrar {
