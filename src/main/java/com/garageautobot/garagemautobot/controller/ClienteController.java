@@ -3,8 +3,6 @@ package com.garageautobot.garagemautobot.controller;
 import com.garageautobot.garagemautobot.entities.Cliente;
 import com.garageautobot.garagemautobot.repositories.ClienteRepository;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,8 +24,10 @@ public class ClienteController {
     @PostMapping("/salvar")
     public String salvarCliente(@ModelAttribute Cliente cliente, Model model) {
         try {
+
+            // ------------ EDITAR CLIENTE ------------
             if (cliente.getId() != null) {
-                // Edição
+
                 Cliente clienteExistente = clienteRepository.findById(cliente.getId())
                         .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + cliente.getId()));
 
@@ -39,32 +39,46 @@ public class ClienteController {
                 clienteExistente.setCidade(cliente.getCidade());
                 clienteExistente.setEstado(cliente.getEstado());
 
-                // NÃO ALTERE CPF durante edição
+                // Agora permite alterar o status
+                clienteExistente.setAtivo(cliente.getAtivo());
+
                 clienteRepository.save(clienteExistente);
 
                 model.addAttribute("message", "Cliente atualizado com sucesso!");
-                model.addAttribute("cliente", clienteExistente);
-            } else {
-                // Novo cliente
-                cliente.setCpf(limparMascara(cliente.getCpf()));
-                cliente.setTelefone(limparMascara(cliente.getTelefone()));
-                cliente.setCep(limparMascara(cliente.getCep()));
 
-                // Verifica se CPF já existe
-                if (clienteRepository.existsByCpf(cliente.getCpf())) {
-                    model.addAttribute("error", "CPF já cadastrado no sistema!");
-                    return "cadastro-cliente";
-                }
-
-                clienteRepository.save(cliente);
-                model.addAttribute("message", "Cliente cadastrado com sucesso!");
-                model.addAttribute("cliente", new Cliente());
+                return "redirect:/clientes/listar";
             }
+
+            // ------------ NOVO CLIENTE ------------
+            cliente.setCpf(limparMascara(cliente.getCpf()));
+            cliente.setTelefone(limparMascara(cliente.getTelefone()));
+            cliente.setCep(limparMascara(cliente.getCep()));
+
+            // verifica cpf duplicado
+            if (clienteRepository.existsByCpf(cliente.getCpf())) {
+                model.addAttribute("error", "CPF já cadastrado no sistema!");
+                return "cadastro-cliente";
+            }
+
+            // novo cliente começa ativo
+            cliente.setAtivo(true);
+
+            clienteRepository.save(cliente);
+
+            model.addAttribute("message", "Cliente cadastrado com sucesso!");
+
         } catch (Exception e) {
             model.addAttribute("error", "Erro ao salvar cliente: " + e.getMessage());
         }
+
         return "redirect:/clientes/listar";
     }
+
+
+    // NÃO PRECISA MAIS DO MÉTODO DE ALTERAR STATUS
+    // FOI REMOVIDO ✔
+    
+
     @GetMapping("/listar")
     public String listarClientes(Model model) {
         model.addAttribute("clientes", clienteRepository.findAll());
@@ -75,11 +89,13 @@ public class ClienteController {
     public String editarCliente(@PathVariable Long id, Model model) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
+
         model.addAttribute("cliente", cliente);
         return "cadastro-cliente";
     }
 
-    // Método utilitário para remover máscara
+
+    // remove máscara
     private String limparMascara(String valor) {
         if (valor != null) {
             return valor.replaceAll("\\D", "");
@@ -87,6 +103,3 @@ public class ClienteController {
         return null;
     }
 }
-
-    
-

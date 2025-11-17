@@ -62,6 +62,15 @@
           <input id="estado" type="text" th:field="*{estado}" class="input" />
         </div>
 
+		<div th:if="${cliente.id != null}">
+		  <label for="ativo" class="label">Status do Cliente</label>
+		  <select id="ativo" th:field="*{ativo}" class="input">
+		    <option th:value="true">Ativo</option>
+		    <option th:value="false">Inativo</option>
+		  </select>
+		</div>
+
+		
         <button type="submit" class="button" th:text="${cliente.id != null} ? 'Salvar Alterações' : 'Cadastrar Cliente'"></button>
 
         <div th:if="${error}" class="error" th:text="${error}"></div>

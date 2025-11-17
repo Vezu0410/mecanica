@@ -21,6 +21,30 @@
     .table tbody tr:hover {
       background: rgba(34, 197, 94, 0.08);
     }
+
+    /* Botões de ação */
+    .btn-acao {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 14px;
+      margin-right: 4px;
+    }
+
+    .btn-editar {
+      background-color: #3b82f6;
+    }
+
+    .btn-excluir {
+      background-color: #ef4444;
+    }
+
+    /* Impede o clique na linha quando clicar nos botões */
+    .no-row-click {
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -46,20 +70,31 @@
             <th>Telefone</th>
             <th>Cidade</th>
             <th>Data Cadastro</th>
+            <th>Status</th>     
           </tr>
         </thead>
-        <tbody>
-          <tr th:each="cliente : ${clientes}" 
-              th:onclick="'window.location.href=\'/clientes/editar/' + ${cliente.id} + '\';'">
-            <td class="id-col" th:text="${cliente.id}"></td>
-            <td th:text="${cliente.nome}"></td>
-            <td th:text="${cliente.cpf}"></td>
-            <td th:text="${cliente.email}"></td>
-            <td th:text="${cliente.telefone}"></td>
-            <td th:text="${cliente.cidade}"></td>
-            <td th:text="${#temporals.format(cliente.dataCadastro, 'dd/MM/yyyy')}"></td>
-          </tr>
-        </tbody>
+
+		<tbody>
+		  <tr th:each="cliente : ${clientes}"
+		      th:onclick="'window.location.href=\'/clientes/editar/' + ${cliente.id} + '\';'">
+
+		    <td class="id-col" th:text="${cliente.id}"></td>
+		    <td th:text="${cliente.nome}"></td>
+		    <td th:text="${cliente.cpf}"></td>
+		    <td th:text="${cliente.email}"></td>
+		    <td th:text="${cliente.telefone}"></td>
+		    <td th:text="${cliente.cidade}"></td>
+		    <td th:text="${#temporals.format(cliente.dataCadastro, 'dd/MM/yyyy')}"></td>
+
+		    <!-- ÚNICA COLUNA DE STATUS -->
+		    <td>
+		      <span th:text="${cliente.ativo} ? 'Ativo' : 'Inativo'"
+		            th:style="${cliente.ativo} ? 'color:green;font-weight:bold;' : 'color:red;font-weight:bold;'">
+		      </span>
+		    </td>
+
+		  </tr>
+		</tbody>
       </table>
 
       <div class="footer">

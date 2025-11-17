@@ -14,6 +14,9 @@ public class Cliente {
     private Long id;
 
     @Column(nullable = false)
+    private Boolean ativo = true;
+
+    @Column(nullable = false)
     private String nome;
 
     @Column(nullable = false, unique = true, length = 11)
@@ -87,6 +90,14 @@ public class Cliente {
         } else {
             this.cep = null;
         }
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
 
     public String getEndereco() { return endereco; }
