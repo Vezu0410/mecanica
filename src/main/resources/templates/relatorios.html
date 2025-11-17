@@ -50,6 +50,12 @@
                 </tr>
             </tbody>
         </table>
+		<form th:action="@{/relatorios/veiculos/pdf}" method="get" 
+		      style="margin-top: 24px; margin-bottom: 16px;">
+		    <button type="submit" class="button" style="background-color:#2196F3;color:white;">
+		        🚗 Gerar PDF dos Veículos
+		    </button>
+		</form>
 
         <!-- Filtro de veículos -->
         <form method="get" th:action="@{/relatorios}" style="margin-top: 24px; margin-bottom: 16px;">

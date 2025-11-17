@@ -42,10 +42,10 @@ public class Cliente {
     public Cliente(String nome, String cpf, String email, String telefone,
                    String cep, String endereco, String cidade, String estado) {
         this.nome = nome;
-        setCpf(cpf);       // já limpa máscara
+        setCpf(cpf); 
         this.email = email;
-        setTelefone(telefone); // já limpa máscara
-        setCep(cep);       // já limpa máscara
+        setTelefone(telefone); 
+        setCep(cep);
         this.endereco = endereco;
         this.cidade = cidade;
         this.estado = estado;
@@ -62,7 +62,7 @@ public class Cliente {
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) {
         if (cpf != null) {
-            this.cpf = cpf.replaceAll("\\D", ""); // remove tudo que não for dígito
+            this.cpf = cpf.replaceAll("\\D", "");
         } else {
             this.cpf = null;
         }
@@ -74,7 +74,7 @@ public class Cliente {
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) {
         if (telefone != null) {
-            this.telefone = telefone.replaceAll("\\D", ""); // mantém só números
+            this.telefone = telefone.replaceAll("\\D", ""); 
         } else {
             this.telefone = null;
         }
@@ -83,7 +83,7 @@ public class Cliente {
     public String getCep() { return cep; }
     public void setCep(String cep) {
         if (cep != null) {
-            this.cep = cep.replaceAll("\\D", ""); // mantém só números
+            this.cep = cep.replaceAll("\\D", "");
         } else {
             this.cep = null;
         }

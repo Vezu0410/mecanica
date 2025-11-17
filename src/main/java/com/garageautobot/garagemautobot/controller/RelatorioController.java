@@ -131,4 +131,91 @@ public class RelatorioController {
         model.addAttribute("searchVeiculo", searchVeiculo);
         return "relatorios";
     }
+    
+    
+    @GetMapping("/relatorios/veiculos/pdf")
+    public ResponseEntity<byte[]> gerarRelatorioVeiculosPDF() {
+        try {
+            List<Veiculo> veiculos = veiculoService.findAll();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            com.itextpdf.text.Document document = new com.itextpdf.text.Document();
+            com.itextpdf.text.pdf.PdfWriter.getInstance(document, baos);
+            document.open();
+
+            com.itextpdf.text.Font tituloFont = new com.itextpdf.text.Font(
+                    com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+            com.itextpdf.text.Font textoFont = new com.itextpdf.text.Font(
+                    com.itextpdf.text.Font.FontFamily.HELVETICA, 12);
+
+            document.add(new com.itextpdf.text.Paragraph("Relatório de Veículos Cadastrados", tituloFont));
+            document.add(new com.itextpdf.text.Paragraph("Gerado em: " +
+                    java.time.LocalDateTime.now().format(
+                            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                    )));
+            document.add(new com.itextpdf.text.Paragraph(" "));
+
+            com.itextpdf.text.pdf.PdfPTable tabela = new com.itextpdf.text.pdf.PdfPTable(7);
+            tabela.setWidthPercentage(100);
+
+            tabela.addCell("Marca");
+            tabela.addCell("Modelo");
+            tabela.addCell("Ano");
+            tabela.addCell("Placa");
+            tabela.addCell("Status");
+            tabela.addCell("Cliente");
+            tabela.addCell("Data Cadastro");
+
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            for (Veiculo v : veiculos) {
+                // sempre converter para String e tratar nulls
+                tabela.addCell(String.valueOf(v.getMarca() == null ? "" : v.getMarca()));
+                tabela.addCell(String.valueOf(v.getModelo() == null ? "" : v.getModelo()));
+                tabela.addCell(String.valueOf(v.getAno())); // ano é provavelmente int
+                tabela.addCell(String.valueOf(v.getPlaca() == null ? "" : v.getPlaca()));
+
+                // Status pode ser um enum — converta para String
+                String statusStr = v.getStatus() == null ? "" : v.getStatus().toString();
+                // se seu enum tiver um método getDescricao(), use: v.getStatus().getDescricao()
+                tabela.addCell(statusStr);
+
+                // cliente pode ser nulo; proteja-se
+                String clienteNome = (v.getCliente() != null && v.getCliente().getNome() != null) ?
+                        v.getCliente().getNome() : "";
+                tabela.addCell(clienteNome);
+
+                // data (pode ser LocalDate/LocalDateTime)
+                String dataStr = "";
+                if (v.getDataCadastro() != null) {
+                    try {
+                        dataStr = v.getDataCadastro().format(df);
+                    } catch (Exception ex) {
+                        dataStr = v.getDataCadastro().toString();
+                    }
+                }
+                tabela.addCell(dataStr);
+            }
+
+            document.add(tabela);
+            document.close();
+
+            byte[] pdfBytes = baos.toByteArray();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "relatorio_veiculos.pdf");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    
+    
 }
