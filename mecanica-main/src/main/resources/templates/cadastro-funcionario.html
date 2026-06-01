@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Funcionário • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="fragments/sidebar :: sidebar"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="form-page-wrapper">
+    <div class="form-card">
+
+      <div class="form-card-header">
+        <div class="page-eyebrow">Recursos Humanos</div>
+        <div class="form-card-title">Cadastro de Funcionário</div>
+        <div class="form-card-subtitle">Preencha os dados do novo colaborador</div>
+      </div>
+
+      <form th:action="@{/funcionarios/salvar}" th:object="${funcionario}" method="post">
+
+        <div class="form-body">
+
+          <div class="form-group">
+            <label for="nome" class="form-label">Nome Completo</label>
+            <input type="text" th:field="*{nome}" id="nome" class="form-input"
+                   placeholder="Ex: Carlos Andrade" required />
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="cpf" class="form-label">CPF (login)</label>
+              <input type="text" th:field="*{cpf}" id="cpf" class="form-input"
+                     placeholder="00000000000" required />
+            </div>
+            <div class="form-group">
+              <label for="senha" class="form-label">Senha</label>
+              <input type="password" th:field="*{senha}" id="senha" class="form-input"
+                     placeholder="Mínimo 6 caracteres" required />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="email" class="form-label">E-mail</label>
+              <input type="email" th:field="*{email}" id="email" class="form-input"
+                     placeholder="email@exemplo.com" />
+            </div>
+            <div class="form-group">
+              <label for="telefone" class="form-label">Telefone</label>
+              <input type="text" th:field="*{telefone}" id="telefone" class="form-input"
+                     placeholder="(41) 99999-9999" />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="idade" class="form-label">Idade</label>
+              <input type="number" th:field="*{idade}" id="idade" class="form-input"
+                     placeholder="Ex: 28" min="16" />
+            </div>
+            <div class="form-group">
+              <label for="cep" class="form-label">CEP</label>
+              <input type="text" th:field="*{cep}" id="cep" class="form-input"
+                     placeholder="00000-000" />
+            </div>
+          </div>
+
+          <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+          <div th:if="${errorMessage}"   class="alert alert-error"   th:text="${errorMessage}"></div>
+
+        </div>
+
+        <div class="form-footer">
+          <a href="/menu" class="btn btn-ghost">← Voltar</a>
+          <button type="submit" class="btn btn-primary">Cadastrar Funcionário</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</body>
+</html>

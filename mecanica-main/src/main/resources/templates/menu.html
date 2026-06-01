@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Painel Principal</div>
+        <div class="page-title">Ordem do Dia</div>
+        <div class="page-subtitle">Veículos em atendimento na oficina</div>
+      </div>
+      <a th:href="@{/veiculos/cadastro}" class="btn btn-primary">+ Novo Veículo</a>
+    </div>
+
+    <!-- Stats Row: usa th:with para calcular contagens compatíveis com Thymeleaf 3 -->
+    <div class="stats-row"
+         th:with="
+           totalManutencao=${#lists.size(veiculos.?[status.name() == 'EM_MANUTENCAO'])},
+           totalAguardando=${#lists.size(veiculos.?[status.name() == 'AGUARDANDO_PECA'])},
+           totalFinalizado=${#lists.size(veiculos.?[status.name() == 'MANUTENCAO_FINALIZADA'])},
+           totalGeral=${#lists.size(veiculos)}
+         ">
+      <div class="stat-card orange">
+        <div class="stat-value" th:text="${totalManutencao}">0</div>
+        <div class="stat-label">Em Manutenção</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-value" th:text="${totalAguardando}">0</div>
+        <div class="stat-label">Aguardando Peça</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-value" th:text="${totalFinalizado}">0</div>
+        <div class="stat-label">Finalizados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" th:text="${totalGeral}">0</div>
+        <div class="stat-label">Total Visível</div>
+      </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+      <form th:action="@{/menu}" method="get" class="filter-form">
+        <select name="status" class="form-select" onchange="this.form.submit()" style="max-width: 200px;">
+          <option th:value="TODOS"                 th:selected="${status == null or status == 'TODOS'}">Todos os status</option>
+          <option th:value="EM_MANUTENCAO"         th:selected="${status == 'EM_MANUTENCAO'}">Em Manutenção</option>
+          <option th:value="AGUARDANDO_PECA"       th:selected="${status == 'AGUARDANDO_PECA'}">Aguardando Peça</option>
+          <option th:value="MANUTENCAO_FINALIZADA" th:selected="${status == 'MANUTENCAO_FINALIZADA'}">Finalizado</option>
+        </select>
+      </form>
+
+      <form th:action="@{/menu}" method="get" class="filter-form" style="flex: 2;">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" name="search" th:value="${search}" class="form-input"
+                 placeholder="Buscar por marca, modelo ou cliente..." />
+        </div>
+        <button type="submit" class="btn btn-ghost">Buscar</button>
+      </form>
+    </div>
+
+    <!-- Cards Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;">
+
+      <div th:each="veiculo : ${veiculos}"
+           th:with="statusNome=${veiculo.status.name()}"
+           th:classappend="${statusNome == 'EM_MANUTENCAO'} ? 'status-manutencao' :
+                            (${statusNome == 'AGUARDANDO_PECA'} ? 'status-aguardando' : 'status-finalizado')"
+           class="veiculo-card">
+
+        <div class="veiculo-card-top">
+          <div>
+            <div class="veiculo-card-title" th:text="${veiculo.marca + ' ' + veiculo.modelo}">Marca Modelo</div>
+            <div style="margin-top:4px;">
+              <span th:if="${veiculo.status.name() == 'EM_MANUTENCAO'}"         class="badge badge-orange">Em Manutenção</span>
+              <span th:if="${veiculo.status.name() == 'AGUARDANDO_PECA'}"       class="badge badge-blue">Aguardando Peça</span>
+              <span th:if="${veiculo.status.name() == 'MANUTENCAO_FINALIZADA'}" class="badge badge-green">Finalizado</span>
+            </div>
+          </div>
+
+          <!-- Menu de opções -->
+          <div class="options-wrapper">
+            <button class="options-trigger" type="button">⋮</button>
+            <div class="options-menu">
+              <form th:action="@{'/veiculos/' + ${veiculo.id} + '/status'}" method="post">
+                <select name="novoStatus" onchange="this.form.submit()">
+                  <option value="" disabled selected>Alterar status…</option>
+                  <option value="EM_MANUTENCAO">Em Manutenção</option>
+                  <option value="AGUARDANDO_PECA">Aguardando Peça</option>
+                  <option value="MANUTENCAO_FINALIZADA">Finalizado</option>
+                </select>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="veiculo-card-info">
+          <div class="veiculo-info-row">
+            👤 <strong th:text="${veiculo.cliente.nome}">Cliente</strong>
+          </div>
+          <div class="veiculo-info-row">
+            📋 <span class="veiculo-card-placa" th:text="${veiculo.placa}">ABC1234</span>
+          </div>
+          <div class="veiculo-info-row" th:if="${veiculo.ano != null}">
+            📅 Ano <strong th:text="${veiculo.ano}">2020</strong>
+          </div>
+        </div>
+
+        <div class="veiculo-card-footer">
+          <button type="button"
+                  th:onclick="'abrirModal(' + ${veiculo.id} + ')'"
+                  class="btn btn-blue btn-sm" style="flex:1;">
+            ⚙ Usar Peça
+          </button>
+          <a th:href="@{'/veiculos/editar/' + ${veiculo.id}}" class="btn btn-ghost btn-sm">✏</a>
+        </div>
+
+      </div>
+
+      <!-- Empty state -->
+      <div th:if="${#lists.isEmpty(veiculos)}"
+           style="grid-column: 1/-1; text-align:center; padding: 60px 0; color: var(--fg-muted);">
+        <div style="font-size:3rem; margin-bottom:12px;">🚗</div>
+        <div style="font-family: var(--font-display); font-size:1.2rem; font-weight:700;
+                    text-transform:uppercase; color: var(--fg-dim);">
+          Nenhum veículo encontrado
+        </div>
+        <div style="font-size:0.85rem; margin-top:6px;">
+          Tente ajustar os filtros ou cadastre um novo veículo
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Adicionar Peça -->
+  <div id="modalPeca" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">⚙ Adicionar Peça</div>
+        <div class="modal-subtitle">Selecione a peça e a quantidade utilizada</div>
+      </div>
+      <form id="formPeca" method="post" class="modal-form">
+        <div class="form-group">
+          <label class="form-label">Peça</label>
+          <select name="pecaId" class="form-select" required>
+            <option value="" disabled selected>Selecione uma peça…</option>
+            <option th:each="peca : ${pecas}"
+                    th:value="${peca.id}"
+                    th:text="${peca.nome + ' (' + peca.quantidade + ' disponível)'}">
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantidade Usada</label>
+          <input type="number" name="quantidadeUsada" class="form-input" min="1" placeholder="Ex: 2" required />
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-success" style="flex:1;">✔ Confirmar</button>
+          <button type="button" onclick="fecharModal()" class="btn btn-danger" style="flex:1;">✕ Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function abrirModal(idVeiculo) {
+      document.getElementById('modalPeca').classList.add('open');
+      document.getElementById('formPeca').action = '/veiculos/' + idVeiculo + '/adicionar-peca';
+    }
+    function fecharModal() {
+      document.getElementById('modalPeca').classList.remove('open');
+    }
+    document.getElementById('modalPeca').addEventListener('click', function(e) {
+      if (e.target === this) fecharModal();
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estoque de Peças • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="main-content">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Estoque</div>
+        <div class="page-title">Peças</div>
+        <div class="page-subtitle">Controle de peças e insumos da oficina</div>
+      </div>
+      <a href="/pecas/cadastro" class="btn btn-primary">+ Nova Peça</a>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Código</th>
+            <th>Qtd. Estoque</th>
+            <th>Preço Unit. (R$)</th>
+            <th>Cadastro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="peca : ${pecas}"
+              class="clickable"
+              th:onclick="'window.location.href=\'/pecas/editar/' + ${peca['id']} + '\';'">
+
+            <td>
+              <span style="font-weight:600;" th:text="${peca['nome']}"></span>
+            </td>
+
+            <td>
+              <span style="font-family: var(--font-display); font-size:0.83rem;
+                           letter-spacing:0.05em; color:var(--fg-muted);"
+                    th:text="${peca['codigo']}"></span>
+            </td>
+
+            <td>
+              <!-- quantidade é Integer — comparação segura com intValue -->
+              <span th:with="qtd=${peca['quantidade']}"
+                    th:classappend="${qtd != null and qtd <= 5} ? 'text-red' : 'text-green'"
+                    style="font-weight:600;"
+                    th:text="${peca['quantidade']}"></span>
+              <span th:with="qtd=${peca['quantidade']}"
+                    th:if="${qtd != null and qtd <= 5}"
+                    class="badge badge-red" style="margin-left:6px;">Baixo</span>
+            </td>
+
+            <!-- precoUnitarioFormatado já vem como String do controller -->
+            <td>
+              <span th:text="${'R$ ' + peca['precoUnitarioFormatado']}"></span>
+            </td>
+
+            <td>
+              <span class="text-muted text-sm" th:text="${peca['dataCadastro']}"></span>
+            </td>
+
+          </tr>
+          <tr th:if="${#lists.isEmpty(pecas)}">
+            <td colspan="5" style="text-align:center; padding:40px; color:var(--fg-muted);">
+              Nenhuma peça cadastrada ainda.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-muted text-sm mt-3">
+      © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Mecanikas
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,242 @@
+/* ============================================================
+   GARAGEM AUTOBOT — MOBILE RESPONSIVE
+   Adicione este bloco no FINAL do global.css
+   OU crie como mobile.css e importe em cada template:
+   <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+   ============================================================ */
+
+/* ── BREAKPOINTS ─────────────────────────────────────────────
+   Mobile:  até 768px
+   Tablet:  769px – 1024px
+   Desktop: acima de 1024px
+   ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+
+  /* ── SIDEBAR: some no mobile ──────────────────────────── */
+  .sidebar { display: none; }
+
+  /* ── CONTEÚDO: ocupa tela toda ────────────────────────── */
+  .main-content {
+    margin-left: 0 !important;
+    padding: 12px 14px 80px; /* padding-bottom reserva espaço para nav-bar */
+    width: 100%;
+  }
+
+  .form-page-wrapper {
+    margin-left: 0 !important;
+    padding: 12px 14px 80px;
+  }
+
+  /* ── NAV BAR INFERIOR (substitui sidebar no mobile) ───── */
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    align-items: stretch;
+  }
+
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--fg-muted);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    gap: 3px;
+    transition: color var(--transition), background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-item:active,
+  .mobile-nav-item.active {
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .mobile-nav-icon { font-size: 1.3rem; line-height: 1; }
+
+  /* ── PAGE HEADER: empilha no mobile ───────────────────── */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+
+  .page-title { font-size: 1.6rem; }
+
+  .page-header > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .page-header > div:last-child .btn {
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+    font-size: 0.82rem;
+    padding: 9px 10px;
+  }
+
+  /* ── STATS ROW: 2 colunas no mobile ───────────────────── */
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stat-value { font-size: 1.6rem; }
+
+  /* ── FILTROS: empilham ─────────────────────────────────── */
+  .filters-bar {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .filter-form { flex: none; width: 100%; }
+  .filter-form .form-select,
+  .filter-form .form-input { width: 100%; }
+
+  /* ── TABELAS: viram cards empilhados ──────────────────── */
+  .table-wrapper { border-radius: var(--radius-sm); overflow: hidden; }
+
+  .data-table thead { display: none; } /* esconde cabeçalho da tabela */
+
+  .data-table tbody tr {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    padding: 12px 14px;
+  }
+
+  .data-table tbody tr:last-child { margin-bottom: 0; }
+
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+
+  .data-table td:last-child { border-bottom: none; padding-bottom: 0; }
+  .data-table td:first-child { padding-top: 0; }
+
+  /* Adiciona label antes de cada célula usando data-label */
+  .data-table td[data-label]::before {
+    content: attr(data-label);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
+  /* ── CARDS DE VEÍCULO: mais compactos ─────────────────── */
+  .veiculo-card { padding: 12px; }
+  .veiculo-card-title { font-size: 0.95rem; }
+
+  /* ── FORMULÁRIOS: 1 coluna ─────────────────────────────── */
+  .form-grid,
+  .form-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .form-card {
+    border-radius: var(--radius);
+    padding: 20px 16px;
+  }
+
+  .form-card-title { font-size: 1.5rem; }
+
+  .form-footer {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .form-footer .btn { width: 100%; justify-content: center; }
+
+  /* ── OS GRID: 1 coluna ─────────────────────────────────── */
+  .os-grid { grid-template-columns: 1fr !important; }
+
+  /* ── MODAL: ocupa tela cheia no mobile ─────────────────── */
+  .modal-overlay { padding: 0; align-items: flex-end; }
+
+  .modal-box {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-width: 100%;
+    width: 100%;
+    padding: 24px 20px 32px;
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  /* ── GALERIA DE FOTOS: 2 colunas no mobile ─────────────── */
+  .fotos-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+  }
+
+  /* Upload sticky vira fixo abaixo das fotos */
+  [style*="position:sticky"] { position: static !important; }
+
+  /* ── BOTÕES: área de toque maior ──────────────────────── */
+  .btn {
+    min-height: 42px;
+    font-size: 0.9rem;
+  }
+
+  .btn-sm {
+    min-height: 36px;
+    padding: 7px 12px;
+  }
+
+  /* ── TABELA DA OS (detalhe): compacta ──────────────────── */
+  .kv-row { font-size: 0.85rem; padding: 6px 0; }
+
+  /* ── LIGHTBOX: fecha com swipe ─────────────────────────── */
+  .lightbox { padding: 10px; }
+  .lightbox img { border-radius: var(--radius-sm); }
+}
+
+/* ── TABLET ───────────────────────────────────────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root { --sidebar-w: 200px; }
+
+  .main-content { padding: 20px 22px; }
+
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+
+  .form-grid-3 { grid-template-columns: 1fr 1fr; }
+
+  .fotos-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── ESCONDE NAV MOBILE NO DESKTOP ───────────────────────── */
+@media (min-width: 769px) {
+  .mobile-nav { display: none !important; }
+}

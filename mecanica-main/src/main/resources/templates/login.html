@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <style>
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 70% 60%, rgba(240,180,41,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 20% 20%, rgba(59,130,246,0.04) 0%, transparent 55%);
+    }
+
+    .login-card {
+      position: relative;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 40px; right: 40px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      border-radius: 0 0 4px 4px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .login-hint {
+      font-size: 0.78rem;
+      color: var(--fg-dim);
+      text-align: center;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-card">
+
+      <div class="login-logo">
+        <div class="login-logo-icon">🔧</div>
+        <div>
+          <div class="login-logo-text">Mecanikas</div>
+          <div class="login-logo-sub">Sistema de Gestão de Oficina</div>
+        </div>
+      </div>
+
+      <div class="login-heading">Entrar</div>
+      <div class="login-sub">Informe suas credenciais para acessar o sistema</div>
+
+      <form th:action="@{/login}" th:object="${loginForm}" method="post" class="login-form">
+
+        <div class="form-group">
+          <label for="cpf" class="form-label">CPF</label>
+          <input id="cpf"
+                 type="text"
+                 th:field="*{cpf}"
+                 class="form-input"
+                 placeholder="00000000000"
+                 minlength="11" maxlength="11"
+                 required />
+        </div>
+
+        <div class="form-group">
+          <label for="senha" class="form-label">Senha</label>
+          <input id="senha"
+                 type="password"
+                 th:field="*{senha}"
+                 class="form-input"
+                 placeholder="••••••••"
+                 required />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-full" style="margin-top:4px;">
+          Entrar no Sistema
+        </button>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+      </form>
+
+      <div class="login-hint">
+        © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Mecanikas · Todos os direitos reservados
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

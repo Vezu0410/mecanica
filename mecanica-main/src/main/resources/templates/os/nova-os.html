@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova OS • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <style>
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      padding: 11px 24px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: none;
+      border: none;
+      color: var(--fg-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transition);
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Tag de veículo selecionado */
+    .veiculo-info-box {
+      display: none;
+      background: var(--surface-2);
+      border: 1px solid var(--border-h);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+      gap: 10px;
+      align-items: center;
+    }
+    .veiculo-info-box.visivel { display: flex; }
+    .veiculo-info-box strong { color: var(--fg); }
+
+    /* Contador de veículos do cliente */
+    .cliente-badge {
+      display: none;
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-top: 4px;
+    }
+    .cliente-badge.visivel { display: block; }
+    .cliente-badge .qtd { color: var(--accent); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="form-page-wrapper" style="align-items:flex-start;">
+    <div class="form-card" style="max-width:700px;">
+
+      <div class="form-card-header">
+        <div class="page-eyebrow">Ordens de Serviço</div>
+        <div class="form-card-title">Nova Ordem de Serviço</div>
+        <div class="form-card-subtitle">Escolha se vai vincular um veículo já cadastrado ou cadastrar um novo</div>
+      </div>
+
+      <!-- Flash errors -->
+      <div th:if="${erro}" class="alert alert-error" style="margin-bottom:20px;" th:text="${erro}"></div>
+
+      <!-- Abas -->
+      <div class="tab-bar">
+        <button class="tab-btn active" type="button" onclick="trocarAba('existente', this)">
+          🚗 Veículo já cadastrado
+        </button>
+        <button class="tab-btn" type="button" onclick="trocarAba('novo', this)">
+          ➕ Cadastrar novo veículo
+        </button>
+      </div>
+
+      <!-- ── ABA 1: VEÍCULO EXISTENTE ────────────────────────── -->
+      <div id="aba-existente" class="tab-panel active">
+        <form th:action="@{/os/abrir/veiculo-existente}" method="post">
+
+          <div class="form-body">
+
+            <!-- Seleção de cliente -->
+            <div class="form-group">
+              <label class="form-label">Cliente</label>
+              <select id="sel-cliente" class="form-select" onchange="onClienteChange(this.value)">
+                <option value="">Selecione um cliente...</option>
+                <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome}"></option>
+              </select>
+              <!-- Mostra quantos veículos o cliente tem -->
+              <div id="cliente-badge" class="cliente-badge">
+                <span id="cliente-badge-txt"></span>
+                &nbsp;·&nbsp;
+                <a href="#" id="link-todos" onclick="mostrarTodos(event)"
+                   style="color:var(--accent); font-size:0.75rem;">
+                  ver todos os veículos
+                </a>
+              </div>
+            </div>
+
+            <!-- Select de veículo (auto-populado) -->
+            <div class="form-group">
+              <label class="form-label">Veículo <span style="color:var(--red);">*</span></label>
+              <select id="sel-veiculo" name="veiculoId" class="form-select"
+                      required onchange="onVeiculoChange(this.value)">
+                <option value="">Selecione um cliente primeiro...</option>
+              </select>
+
+              <!-- Card informativo do veículo selecionado -->
+              <div id="veiculo-info-box" class="veiculo-info-box">
+                <span>🚗</span>
+                <div>
+                  <strong id="vinfo-nome"></strong>
+                  <span id="vinfo-placa"
+                        class="badge badge-yellow"
+                        style="margin-left:8px; font-size:0.75rem;"></span>
+                  <br>
+                  <span id="vinfo-ano" class="text-muted text-sm"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                Descrição do Problema / Serviço
+                <span style="color:var(--red);">*</span>
+              </label>
+              <textarea name="descricaoProblema" class="form-input" rows="3"
+                        placeholder="Ex: Troca de pastilhas de freio dianteiras, barulho ao frear..."
+                        required style="resize:vertical;"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Observações Internas (opcional)</label>
+              <textarea name="observacoes" class="form-input" rows="2"
+                        placeholder="Notas internas do mecânico..."
+                        style="resize:vertical;"></textarea>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <a href="/os" class="btn btn-ghost">← Cancelar</a>
+            <button type="submit" class="btn btn-primary">Abrir OS</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── ABA 2: NOVO VEÍCULO ─────────────────────────────── -->
+      <div id="aba-novo" class="tab-panel">
+        <form th:action="@{/os/abrir/novo-veiculo}" method="post">
+
+          <div class="form-body">
+
+            <div style="background:var(--surface-2); border:1px solid var(--border);
+                        border-radius:var(--radius); padding:16px 20px; margin-bottom:4px;">
+              <div style="font-family:var(--font-display); font-size:0.9rem; font-weight:700;
+                           text-transform:uppercase; letter-spacing:.06em;
+                           color:var(--fg-muted); margin-bottom:12px;">
+                Dados do Veículo
+              </div>
+
+              <div class="form-group" style="margin-bottom:12px;">
+                <label class="form-label">Cliente <span style="color:var(--red);">*</span></label>
+                <select name="clienteId" class="form-select" required>
+                  <option value="">Selecione o cliente...</option>
+                  <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome}"></option>
+                </select>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Marca <span style="color:var(--red);">*</span></label>
+                  <input type="text" name="marca" class="form-input"
+                         placeholder="Ex: Toyota" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Modelo <span style="color:var(--red);">*</span></label>
+                  <input type="text" name="modelo" class="form-input"
+                         placeholder="Ex: Corolla" required />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Ano <span style="color:var(--red);">*</span></label>
+                  <input type="text" name="ano" class="form-input"
+                         placeholder="2020" maxlength="4" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Placa <span style="color:var(--red);">*</span></label>
+                  <input type="text" name="placa" class="form-input"
+                         placeholder="ABC1234" maxlength="7"
+                         style="text-transform:uppercase;" required />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                Descrição do Problema / Serviço
+                <span style="color:var(--red);">*</span>
+              </label>
+              <textarea name="descricaoProblema" class="form-input" rows="3"
+                        placeholder="Ex: Troca de óleo e filtros, revisão geral..."
+                        required style="resize:vertical;"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Observações Internas (opcional)</label>
+              <textarea name="observacoes" class="form-input" rows="2"
+                        placeholder="Notas internas do mecânico..."
+                        style="resize:vertical;"></textarea>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <a href="/os" class="btn btn-ghost">← Cancelar</a>
+            <button type="submit" class="btn btn-primary">Cadastrar Veículo e Abrir OS</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+
+    // ── Monta mapa veiculosPorCliente a partir dos dados do Thymeleaf ──
+    const veiculosPorCliente = {};
+    const todosVeiculos      = [];
+
+    /*[# th:each="v : ${veiculos}"]*/
+    (function() {
+      const v = {
+        id:      /*[[${v.id}]]*/ 0,
+        clienteId: /*[[${v.cliente.id}]]*/ 0,
+        nome:    /*[[${v.marca + ' ' + v.modelo}]]*/ '',
+        placa:   /*[[${v.placa}]]*/ '',
+        ano:     /*[[${v.ano}]]*/ '',
+        texto:   /*[[${v.marca + ' ' + v.modelo + ' — ' + v.placa}]]*/ ''
+      };
+      if (!veiculosPorCliente[v.clienteId]) veiculosPorCliente[v.clienteId] = [];
+      veiculosPorCliente[v.clienteId].push(v);
+      todosVeiculos.push(v);
+    })();
+    /*[/]*/
+
+    // ── Referências DOM ────────────────────────────────────────────────
+    const selCliente   = document.getElementById('sel-cliente');
+    const selVeiculo   = document.getElementById('sel-veiculo');
+    const badgeEl      = document.getElementById('cliente-badge');
+    const badgeTxt     = document.getElementById('cliente-badge-txt');
+    const infoBox      = document.getElementById('veiculo-info-box');
+    const vinfoNome    = document.getElementById('vinfo-nome');
+    const vinfoPlaca   = document.getElementById('vinfo-placa');
+    const vinfoAno     = document.getElementById('vinfo-ano');
+
+    // ── Ao selecionar um cliente ───────────────────────────────────────
+    function onClienteChange(clienteId) {
+      // Limpa estado anterior
+      esconderInfoVeiculo();
+
+      if (!clienteId) {
+        selVeiculo.innerHTML = '<option value="">Selecione um cliente primeiro...</option>';
+        badgeEl.classList.remove('visivel');
+        return;
+      }
+
+      const lista = veiculosPorCliente[clienteId] || [];
+
+      // Atualiza badge de contagem
+      if (lista.length === 0) {
+        badgeTxt.innerHTML = '<span style="color:var(--red);">Nenhum veículo cadastrado para este cliente</span>';
+        selVeiculo.innerHTML = '<option value="">Nenhum veículo encontrado</option>';
+        badgeEl.classList.add('visivel');
+        document.getElementById('link-todos').style.display = 'inline';
+        return;
+      }
+
+      // Popula o select
+      preencherSelect(lista);
+
+      // Badge com contagem
+      badgeTxt.innerHTML = '<span class="qtd">' + lista.length + '</span> veículo(s) encontrado(s)';
+      badgeEl.classList.add('visivel');
+
+      // AUTO-SELECIONA: se tiver 1 veículo → seleciona automaticamente
+      // se tiver mais de 1 → seleciona o primeiro e aguarda o usuário escolher
+      if (lista.length === 1) {
+        selVeiculo.value = lista[0].id;
+        mostrarInfoVeiculo(lista[0]);
+        badgeTxt.innerHTML = '<span class="qtd">1</span> veículo encontrado — selecionado automaticamente ✔';
+      } else {
+        // Seleciona o primeiro mas mantém opção de escolha
+        selVeiculo.selectedIndex = 1;
+        mostrarInfoVeiculo(lista[0]);
+      }
+    }
+
+    // ── Ao trocar o veículo no select ─────────────────────────────────
+    function onVeiculoChange(veiculoId) {
+      if (!veiculoId) { esconderInfoVeiculo(); return; }
+
+      // Busca o veículo em todos os dados
+      const veiculo = todosVeiculos.find(v => v.id == veiculoId);
+      if (veiculo) mostrarInfoVeiculo(veiculo);
+    }
+
+    // ── Mostra card de info do veículo ────────────────────────────────
+    function mostrarInfoVeiculo(v) {
+      vinfoNome.textContent  = v.nome;
+      vinfoPlaca.textContent = v.placa;
+      vinfoAno.textContent   = 'Ano: ' + v.ano;
+      infoBox.classList.add('visivel');
+    }
+
+    function esconderInfoVeiculo() {
+      infoBox.classList.remove('visivel');
+    }
+
+    // ── Preenche o select de veículos ─────────────────────────────────
+    function preencherSelect(lista) {
+      selVeiculo.innerHTML = lista.length > 1
+        ? '<option value="">Selecione um veículo...</option>'
+        : '';
+      lista.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value       = v.id;
+        opt.textContent = v.texto;
+        selVeiculo.appendChild(opt);
+      });
+    }
+
+    // ── Mostrar todos os veículos (link) ──────────────────────────────
+    function mostrarTodos(event) {
+      // CORRIGIDO: previne o href="#" de rolar a página
+      event.preventDefault();
+
+      preencherSelect(todosVeiculos);
+      selVeiculo.selectedIndex = 0;
+      esconderInfoVeiculo();
+
+      badgeTxt.innerHTML = '<span class="qtd">' + todosVeiculos.length + '</span> veículo(s) — mostrando todos';
+      document.getElementById('link-todos').style.display = 'none';
+    }
+
+    // ── Trocar aba ────────────────────────────────────────────────────
+    function trocarAba(aba, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('aba-' + aba).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    /*]]>*/
+  </script>
+
+</body>
+</html>

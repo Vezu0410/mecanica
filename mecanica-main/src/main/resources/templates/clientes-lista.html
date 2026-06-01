@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clientes • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="fragments/sidebar :: sidebar"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+  
+  <div class="main-content">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Cadastros</div>
+        <div class="page-title">Clientes</div>
+        <div class="page-subtitle">Clientes registrados na Mecanikas</div>
+      </div>
+      <a href="/clientes/cadastrar" class="btn btn-primary">+ Novo Cliente</a>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Cidade</th>
+            <th>Cadastro</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="cliente : ${clientes}"
+              class="clickable"
+              th:onclick="'window.location.href=\'/clientes/editar/' + ${cliente.id} + '\';'">
+            <td>
+              <span style="font-weight:600;" th:text="${cliente.nome}"></span>
+            </td>
+            <td>
+              <span class="text-muted text-sm" th:text="${cliente.cpf}"></span>
+            </td>
+            <td th:text="${cliente.email}"></td>
+            <td>
+              <span class="text-muted text-sm" th:text="${cliente.telefone}"></span>
+            </td>
+            <td th:text="${cliente.cidade}"></td>
+            <td>
+              <span class="text-muted text-sm"
+                    th:text="${#temporals.format(cliente.dataCadastro, 'dd/MM/yyyy')}"></span>
+            </td>
+            <td>
+              <span th:if="${cliente.ativo}"  class="badge badge-green">Ativo</span>
+              <span th:if="${!cliente.ativo}" class="badge badge-red">Inativo</span>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(clientes)}">
+            <td colspan="7" style="text-align:center; padding:40px; color:var(--fg-muted);">
+              Nenhum cliente cadastrado ainda.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-muted text-sm mt-3">
+      © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Mecanikas
+    </div>
+
+  </div>
+</body>
+</html>

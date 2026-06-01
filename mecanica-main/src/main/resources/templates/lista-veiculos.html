@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veículos • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="fragments/sidebar :: sidebar"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="main-content">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Cadastros</div>
+        <div class="page-title">Veículos</div>
+        <div class="page-subtitle">Frota registrada na Garagem AutoBot</div>
+      </div>
+      <a href="/veiculos/cadastro" class="btn btn-primary">+ Novo Veículo</a>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Foto</th>
+            <th>Veículo</th>
+            <th>Placa</th>
+            <th>Ano</th>
+            <th>Status</th>
+            <th>Cliente</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="veiculo : ${veiculos}">
+            <td>
+              <a th:if="${veiculo.caminhoFoto != null}"
+                 th:href="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}" target="_blank">
+                <img th:src="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}"
+                     alt="Foto" class="foto-thumb" />
+              </a>
+              <span th:if="${veiculo.caminhoFoto == null}" class="no-foto">📷</span>
+            </td>
+            <td>
+              <div style="font-weight:600;" th:text="${veiculo.marca + ' ' + veiculo.modelo}"></div>
+            </td>
+            <td>
+              <span style="font-family: var(--font-display); font-size:0.85rem; letter-spacing:0.06em; color:var(--fg-muted);"
+                    th:text="${veiculo.placa}"></span>
+            </td>
+            <td th:text="${veiculo.ano}"></td>
+            <td>
+              <span th:if="${veiculo.status.name() == 'EM_MANUTENCAO'}"         class="badge badge-orange">Em Manutenção</span>
+              <span th:if="${veiculo.status.name() == 'AGUARDANDO_PECA'}"       class="badge badge-blue">Aguardando Peça</span>
+              <span th:if="${veiculo.status.name() == 'MANUTENCAO_FINALIZADA'}" class="badge badge-green">Finalizado</span>
+            </td>
+            <td th:text="${veiculo.cliente.nome}"></td>
+            <td>
+              <a th:href="@{'/veiculos/editar/' + ${veiculo.id}}" class="btn btn-ghost btn-sm">✏ Editar</a>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(veiculos)}">
+            <td colspan="7" style="text-align:center; padding:40px; color:var(--fg-muted);">
+              Nenhum veículo cadastrado ainda.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-muted text-sm mt-3">
+      © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Mecanikas
+    </div>
+
+  </div>
+</body>
+</html>

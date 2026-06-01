@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peça • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="fragments/sidebar :: sidebar"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="form-page-wrapper">
+    <div class="form-card">
+
+      <div class="form-card-header">
+        <div class="page-eyebrow">Estoque</div>
+        <div class="form-card-title">Cadastrar Peça</div>
+        <div class="form-card-subtitle">Adicione ou edite uma peça do estoque</div>
+      </div>
+
+      <form th:action="@{/pecas/salvar}" th:object="${peca}" method="post">
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="form-body">
+
+          <div class="form-group">
+            <label for="nome" class="form-label">Nome da Peça</label>
+            <input type="text" th:field="*{nome}" id="nome" class="form-input"
+                   placeholder="Ex: Pastilha de Freio Dianteira" required />
+          </div>
+
+          <div class="form-group">
+            <label for="codigo" class="form-label">Código</label>
+            <input type="text" th:field="*{codigo}" id="codigo" class="form-input"
+                   placeholder="Ex: PF-0010" required />
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="quantidade" class="form-label">Quantidade em Estoque</label>
+              <input type="number" th:field="*{quantidade}" id="quantidade" class="form-input"
+                     min="0" placeholder="0" required />
+            </div>
+            <div class="form-group">
+              <label for="precoUnitario" class="form-label">Preço Unitário (R$)</label>
+              <input type="number" step="0.01" th:field="*{precoUnitario}" id="precoUnitario"
+                     class="form-input" min="0" placeholder="0,00" required />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-footer">
+          <a href="/pecas/lista" class="btn btn-ghost">← Voltar</a>
+          <button type="submit" class="btn btn-primary">Salvar Peça</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</body>
+</html>

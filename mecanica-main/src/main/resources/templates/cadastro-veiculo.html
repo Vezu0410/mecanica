@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veículo • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="fragments/sidebar :: sidebar"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="form-page-wrapper">
+    <div class="form-card">
+
+      <div class="form-card-header">
+        <div class="page-eyebrow">Cadastro de Veículo</div>
+        <div class="form-card-title">Novo Veículo</div>
+        <div class="form-card-subtitle">Preencha os dados do veículo e selecione o cliente</div>
+      </div>
+
+      <form th:action="@{/veiculos/salvar}" th:object="${veiculo}"
+            method="post" enctype="multipart/form-data">
+
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="form-body">
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Marca</label>
+              <input type="text" th:field="*{marca}" class="form-input" placeholder="Ex: Toyota" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Modelo</label>
+              <input type="text" th:field="*{modelo}" class="form-input" placeholder="Ex: Corolla" required />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Ano</label>
+              <input type="text" th:field="*{ano}" class="form-input" placeholder="2020" maxlength="4" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Placa</label>
+              <input type="text" th:field="*{placa}" class="form-input" placeholder="ABC1234" maxlength="7"
+                     style="text-transform:uppercase;" required />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select th:field="*{status}" class="form-select" required>
+                <option value="EM_MANUTENCAO">Em Manutenção</option>
+                <option value="MANUTENCAO_FINALIZADA">Manutenção Finalizada</option>
+                <option value="AGUARDANDO_PECA">Aguardando Peça</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cliente</label>
+              <select th:field="*{cliente.id}" class="form-select" required>
+                <option value="" disabled>Selecione um cliente…</option>
+                <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome}"></option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Peça Utilizada (opcional)</label>
+            <select name="peca.id" class="form-select">
+              <option value="">Nenhuma peça no momento</option>
+              <option th:each="peca : ${pecas}" th:value="${peca.id}"
+                      th:text="${peca.nome + ' — ' + peca.quantidade + ' unid.'}"></option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Foto do Veículo</label>
+            <input type="file" name="foto" class="form-input" accept="image/*" />
+            <div th:if="${veiculo.caminhoFoto != null}" style="margin-top: 10px;">
+              <img th:src="@{'/uploads/veiculos/' + ${veiculo.caminhoFoto}}"
+                   alt="Foto atual" style="max-width:200px; border-radius:var(--radius); border:1px solid var(--border);" />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-footer">
+          <a href="/veiculos/lista" class="btn btn-ghost">← Voltar</a>
+          <button type="submit" class="btn btn-primary">Salvar Veículo</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</body>
+</html>

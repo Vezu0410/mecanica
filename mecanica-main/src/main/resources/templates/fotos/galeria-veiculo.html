@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Fotos do Veículo • Garagem AutoBot</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <style>
+    /* ── GRID DE FOTOS ─────────────────────────────────────── */
+    .fotos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .foto-card {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      aspect-ratio: 4/3;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .foto-card:hover { transform: scale(1.02); box-shadow: var(--shadow-md); }
+
+    .foto-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .foto-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity var(--transition);
+      display: flex;
+      align-items: flex-end;
+      padding: 8px;
+    }
+
+    .foto-card:hover .foto-card-overlay { opacity: 1; }
+
+    .foto-legenda {
+      font-size: 0.75rem;
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-excluir-foto {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ── UPLOAD AREA ───────────────────────────────────────── */
+    .upload-area {
+      border: 2px dashed var(--border-h);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      transition: border-color var(--transition), background var(--transition);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .upload-area:hover, .upload-area.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon { font-size: 2.5rem; margin-bottom: 8px; }
+    .upload-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+                    text-transform: uppercase; letter-spacing: .04em; color: var(--fg); }
+    .upload-hint  { font-size: 0.8rem; color: var(--fg-muted); margin-top: 4px; }
+
+    /* Preview das fotos antes de enviar */
+    #preview-container {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    #preview-container.visivel { display: flex; }
+
+    .preview-thumb {
+      width: 80px; height: 60px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    /* ── SEÇÃO DE MOMENTO ──────────────────────────────────── */
+    .momento-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .momento-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: var(--transition);
+      background: var(--surface);
+      color: var(--fg-muted);
+    }
+
+    .momento-tab.ativo {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    /* ── LIGHTBOX ──────────────────────────────────────────── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .lightbox.open { display: flex; }
+
+    .lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: var(--radius);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .lightbox-info {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      text-align: center;
+      max-width: 80vw;
+    }
+
+    /* ── MOBILE ADJUSTMENTS ─────────────────────────────────── */
+    @media (max-width: 600px) {
+      .fotos-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .upload-area { padding: 20px 12px; }
+      .momento-tabs { gap: 6px; }
+    }
+
+    /* Botão câmera exclusivo para mobile */
+    .btn-camera {
+      display: none;
+      width: 100%;
+      padding: 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-h);
+      border-radius: var(--radius);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .btn-camera input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      /* Dispositivo touch — mostra botão câmera */
+      .btn-camera { display: block; }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 0;
+      color: var(--fg-muted);
+    }
+
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 8px; }
+    .empty-state-txt  { font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" onclick="fecharLightbox()">
+    <button class="lightbox-close" onclick="fecharLightbox()">✕</button>
+    <img id="lightbox-img" src="" alt="" />
+    <div id="lightbox-info" class="lightbox-info"></div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Check-list Visual</div>
+        <div class="page-title"
+             th:text="${veiculo.marca + ' ' + veiculo.modelo}">Veículo</div>
+        <div class="page-subtitle">
+          <span style="font-family:var(--font-display); letter-spacing:.06em; color:var(--fg-muted);"
+                th:text="${veiculo.placa}"></span>
+          &nbsp;·&nbsp;
+          <span th:text="${veiculo.cliente.nome}"></span>
+          &nbsp;·&nbsp;
+          <span class="text-muted"
+                th:text="${(#lists.size(fotosEntrada) + #lists.size(fotosSaida)) + ' foto(s) registrada(s)'}">
+          </span>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <!-- Botão voltar para OS se veio de uma OS -->
+        <a th:if="${osId != null}" th:href="@{'/os/' + ${osId}}" class="btn btn-ghost">← Voltar à OS</a>
+        <a th:if="${osId == null}" th:href="@{'/veiculos/editar/' + ${veiculo.id}}" class="btn btn-ghost">← Veículo</a>
+      </div>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${sucesso}" class="alert alert-success" style="margin-bottom:16px;" th:text="${sucesso}"></div>
+    <div th:if="${erro}"    class="alert alert-error"   style="margin-bottom:16px;" th:text="${erro}"></div>
+
+    <div style="display:grid; grid-template-columns: 1fr 320px; gap:20px; align-items:start;">
+
+      <!-- ── COLUNA PRINCIPAL: GALERIAS ──────────────────────────── -->
+      <div>
+
+        <!-- FOTOS DE ENTRADA -->
+        <div class="info-section" style="background:var(--surface); border:1px solid var(--border);
+                                          border-radius:var(--radius); padding:20px; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;
+                      margin-bottom:4px; padding-bottom:12px; border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-family:var(--font-display); font-size:0.85rem; font-weight:700;
+                           text-transform:uppercase; letter-spacing:.08em; color:var(--fg-muted);">
+                📸 Fotos de Entrada
+              </div>
+              <div class="text-muted text-sm" style="margin-top:2px;">
+                Estado do veículo ao chegar na oficina
+              </div>
+            </div>
+            <span class="badge badge-orange"
+                  th:text="${#lists.size(fotosEntrada) + ' foto(s)'}"></span>
+          </div>
+
+          <div class="fotos-grid" th:if="${!#lists.isEmpty(fotosEntrada)}">
+            <div th:each="foto : ${fotosEntrada}" class="foto-card"
+                 th:onclick="'abrirLightbox(\'/fotos/imagem/' + ${foto.nomeArquivo} + '\', \'' + (${foto.legenda ?: ''}) + '\', \'' + ${#temporals.format(foto.dataRegistro, 'dd/MM/yyyy HH:mm')} + '\')'">
+              <img th:src="@{'/fotos/imagem/' + ${foto.nomeArquivo}}"
+                   th:alt="${foto.legenda ?: 'Foto de entrada'}" loading="lazy" />
+              <div class="foto-card-overlay">
+                <span class="foto-legenda" th:text="${foto.legenda ?: ''}"></span>
+                <form th:action="@{'/fotos/' + ${foto.id} + '/excluir'}" method="post"
+                      onclick="event.stopPropagation()"
+                      onsubmit="return confirm('Excluir esta foto? A ação não pode ser desfeita.')">
+                  <input type="hidden" name="veiculoId" th:value="${veiculo.id}" />
+                  <input type="hidden" name="osId"      th:value="${osId}" />
+                  <button type="submit" class="btn-excluir-foto">🗑</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div th:if="${#lists.isEmpty(fotosEntrada)}" class="empty-state">
+            <div class="empty-state-icon">📷</div>
+            <div class="empty-state-txt">Nenhuma foto de entrada registrada ainda</div>
+          </div>
+        </div>
+
+        <!-- FOTOS DE SAÍDA -->
+        <div style="background:var(--surface); border:1px solid var(--border);
+                    border-radius:var(--radius); padding:20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;
+                      margin-bottom:4px; padding-bottom:12px; border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-family:var(--font-display); font-size:0.85rem; font-weight:700;
+                           text-transform:uppercase; letter-spacing:.08em; color:var(--fg-muted);">
+                ✅ Fotos de Saída
+              </div>
+              <div class="text-muted text-sm" style="margin-top:2px;">
+                Estado do veículo ao ser entregue ao cliente
+              </div>
+            </div>
+            <span class="badge badge-green"
+                  th:text="${#lists.size(fotosSaida) + ' foto(s)'}"></span>
+          </div>
+
+          <div class="fotos-grid" th:if="${!#lists.isEmpty(fotosSaida)}">
+            <div th:each="foto : ${fotosSaida}" class="foto-card"
+                 th:onclick="'abrirLightbox(\'/fotos/imagem/' + ${foto.nomeArquivo} + '\', \'' + (${foto.legenda ?: ''}) + '\', \'' + ${#temporals.format(foto.dataRegistro, 'dd/MM/yyyy HH:mm')} + '\')'">
+              <img th:src="@{'/fotos/imagem/' + ${foto.nomeArquivo}}"
+                   th:alt="${foto.legenda ?: 'Foto de saída'}" loading="lazy" />
+              <div class="foto-card-overlay">
+                <span class="foto-legenda" th:text="${foto.legenda ?: ''}"></span>
+                <form th:action="@{'/fotos/' + ${foto.id} + '/excluir'}" method="post"
+                      onclick="event.stopPropagation()"
+                      onsubmit="return confirm('Excluir esta foto? A ação não pode ser desfeita.')">
+                  <input type="hidden" name="veiculoId" th:value="${veiculo.id}" />
+                  <input type="hidden" name="osId"      th:value="${osId}" />
+                  <button type="submit" class="btn-excluir-foto">🗑</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div th:if="${#lists.isEmpty(fotosSaida)}" class="empty-state">
+            <div class="empty-state-icon">📷</div>
+            <div class="empty-state-txt">Nenhuma foto de saída registrada ainda</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── COLUNA DIREITA: UPLOAD ──────────────────────────────── -->
+      <div style="position:sticky; top:20px;">
+        <div style="background:var(--surface); border:1px solid var(--border);
+                    border-radius:var(--radius); padding:20px;">
+
+          <div style="font-family:var(--font-display); font-size:0.85rem; font-weight:700;
+                       text-transform:uppercase; letter-spacing:.08em;
+                       color:var(--fg-muted); margin-bottom:16px; padding-bottom:10px;
+                       border-bottom:1px solid var(--border);">
+            Adicionar Fotos
+          </div>
+
+          <form th:action="@{'/fotos/veiculo/' + ${veiculo.id} + '/upload'}"
+                method="post" enctype="multipart/form-data" id="formUpload">
+
+            <input type="hidden" name="osId" th:value="${osId}" />
+
+            <!-- Momento: Entrada ou Saída -->
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Momento</label>
+              <div class="momento-tabs">
+                <div class="momento-tab ativo" id="tab-entrada"
+                     onclick="selecionarMomento('ENTRADA', this)">
+                  📸 Entrada
+                </div>
+                <div class="momento-tab" id="tab-saida"
+                     onclick="selecionarMomento('SAIDA', this)">
+                  ✅ Saída
+                </div>
+              </div>
+              <input type="hidden" name="momento" id="input-momento" value="ENTRADA" />
+            </div>
+
+            <!-- Legenda opcional -->
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Legenda (opcional)</label>
+              <input type="text" name="legenda" class="form-input"
+                     placeholder="Ex: Amassado traseiro esquerdo" />
+            </div>
+
+            <!-- Botão câmera (aparece em touch devices) -->
+            <div class="btn-camera">
+              📷 Tirar foto com câmera
+              <input type="file" id="input-camera" name="arquivos"
+                     accept="image/*" capture="environment" multiple
+                     onchange="previewFotos(this)" />
+            </div>
+
+            <!-- Área de drag & drop (aparece em desktop) -->
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="input-arquivo" name="arquivos"
+                     accept="image/*" multiple
+                     onchange="previewFotos(this)" />
+              <div class="upload-icon">🖼️</div>
+              <div class="upload-title">Selecionar fotos</div>
+              <div class="upload-hint">
+                Arraste e solte ou clique para selecionar<br>
+                JPG, PNG, WEBP — sem limite de quantidade
+              </div>
+            </div>
+
+            <!-- Preview das fotos selecionadas -->
+            <div id="preview-container">
+              <!-- preenchido por JS -->
+            </div>
+
+            <div id="preview-count"
+                 style="font-size:0.8rem; color:var(--accent); margin-top:8px; display:none;">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full"
+                    style="margin-top:16px;" id="btnEnviar" disabled>
+              Enviar Fotos
+            </button>
+          </form>
+
+          <!-- Dica mobile -->
+          <div style="margin-top:14px; padding:10px 12px; background:var(--surface-2);
+                      border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <div style="font-size:0.75rem; color:var(--fg-muted); line-height:1.5;">
+              💡 <strong style="color:var(--fg);">Dica:</strong>
+              No celular, toque em "Tirar foto com câmera" para fotografar diretamente.
+              No computador, selecione múltiplas fotos de uma vez usando Ctrl+Clique.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="text-muted text-sm mt-3">
+      © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Garagem AutoBot
+    </div>
+  </div>
+
+  <script>
+    // ── Selecionar momento (ENTRADA / SAIDA) ──────────────────────
+    function selecionarMomento(valor, el) {
+      document.querySelectorAll('.momento-tab').forEach(t => t.classList.remove('ativo'));
+      el.classList.add('ativo');
+      document.getElementById('input-momento').value = valor;
+    }
+
+    // ── Preview das fotos antes de enviar ─────────────────────────
+    function previewFotos(input) {
+      const container = document.getElementById('preview-container');
+      const count     = document.getElementById('preview-count');
+      const btnEnviar = document.getElementById('btnEnviar');
+
+      container.innerHTML = '';
+
+      if (!input.files || input.files.length === 0) {
+        container.classList.remove('visivel');
+        count.style.display = 'none';
+        btnEnviar.disabled  = true;
+        return;
+      }
+
+      // Sincroniza os dois inputs (câmera e arquivo) no mesmo form
+      const outroInput = input.id === 'input-camera'
+        ? document.getElementById('input-arquivo')
+        : document.getElementById('input-camera');
+
+      // Mostra previews
+      Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src       = e.target.result;
+          img.className = 'preview-thumb';
+          img.title     = file.name;
+          container.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      container.classList.add('visivel');
+      count.style.display = 'block';
+      count.textContent   = input.files.length + ' foto(s) pronta(s) para envio';
+      btnEnviar.disabled  = false;
+    }
+
+    // ── Drag & drop na upload area ────────────────────────────────
+    const uploadArea = document.getElementById('uploadArea');
+    if (uploadArea) {
+      uploadArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+      });
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('drag-over');
+      });
+      uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        const input = document.getElementById('input-arquivo');
+        input.files = e.dataTransfer.files;
+        previewFotos(input);
+      });
+    }
+
+    // ── Lightbox ──────────────────────────────────────────────────
+    function abrirLightbox(src, legenda, data) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-info').textContent =
+        (legenda ? legenda + '  ·  ' : '') + data;
+      lb.classList.add('open');
+    }
+
+    function fecharLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') fecharLightbox();
+    });
+  </script>
+
+</body>
+</html>

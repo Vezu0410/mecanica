@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ordens de Serviço • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="main-content">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Gestão</div>
+        <div class="page-title">Ordens de Serviço</div>
+        <div class="page-subtitle">Controle completo de atendimentos da oficina</div>
+      </div>
+      <a href="/os/nova" class="btn btn-primary">+ Nova OS</a>
+    </div>
+
+    <!-- Alertas flash -->
+    <div th:if="${sucesso}" class="alert alert-success" style="margin-bottom:16px;" th:text="${sucesso}"></div>
+    <div th:if="${erro}"    class="alert alert-error"   style="margin-bottom:16px;" th:text="${erro}"></div>
+
+    <!-- Stats rápidos -->
+    <div class="stats-row"
+         th:with="
+           qtAberta=${#lists.size(ordens.?[status.name() == 'ABERTA'])},
+           qtAndamento=${#lists.size(ordens.?[status.name() == 'EM_ANDAMENTO'])},
+           qtAguardando=${#lists.size(ordens.?[status.name() == 'AGUARDANDO_PECA'])},
+           qtConcluida=${#lists.size(ordens.?[status.name() == 'CONCLUIDA'])}
+         ">
+      <div class="stat-card accent">
+        <div class="stat-value" th:text="${qtAberta}">0</div>
+        <div class="stat-label">Abertas</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-value" th:text="${qtAndamento}">0</div>
+        <div class="stat-label">Em Andamento</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-value" th:text="${qtAguardando}">0</div>
+        <div class="stat-label">Aguardando Peça</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-value" th:text="${qtConcluida}">0</div>
+        <div class="stat-label">Concluídas</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-bar">
+      <form th:action="@{/os}" method="get" class="filter-form">
+        <select name="status" class="form-select" onchange="this.form.submit()" style="max-width:200px;">
+          <option th:value="TODOS" th:selected="${statusFiltro == null or statusFiltro == 'TODOS'}">
+            Todos os status
+          </option>
+          <option th:each="s : ${statusOpcoes}"
+                  th:value="${s.name()}"
+                  th:text="${s.descricao}"
+                  th:selected="${statusFiltro == s.name()}">
+          </option>
+        </select>
+      </form>
+      <form th:action="@{/os}" method="get" class="filter-form" style="flex:2;">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" name="search" th:value="${search}" class="form-input"
+                 placeholder="Buscar por Nº OS, placa, cliente ou veículo..." />
+        </div>
+        <button type="submit" class="btn btn-ghost">Buscar</button>
+      </form>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nº OS</th>
+            <th>Veículo</th>
+            <th>Cliente</th>
+            <th>Problema</th>
+            <th>Status</th>
+            <th>Abertura</th>
+            <th>Total (R$)</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="os : ${ordens}" class="clickable"
+              th:onclick="'window.location.href=\'/os/' + ${os.id} + '\';'">
+
+            <td>
+              <span style="font-family:var(--font-display); font-weight:700; color:var(--accent);"
+                    th:text="${os.numeroOS}"></span>
+            </td>
+            <td>
+              <div style="font-weight:600;" th:text="${os.veiculo.marca + ' ' + os.veiculo.modelo}"></div>
+              <div class="text-muted text-sm"
+                   style="font-family:var(--font-display); letter-spacing:.05em;"
+                   th:text="${os.veiculo.placa}"></div>
+            </td>
+            <td th:text="${os.veiculo.cliente.nome}"></td>
+            <td>
+              <span th:text="${#strings.abbreviate(os.descricaoProblema, 50)}"
+                    style="color:var(--fg-muted);"></span>
+            </td>
+            <td>
+              <span th:switch="${os.status.name()}">
+                <span th:case="'ABERTA'"          class="badge badge-yellow">Aberta</span>
+                <span th:case="'EM_ANDAMENTO'"    class="badge badge-orange">Em Andamento</span>
+                <span th:case="'AGUARDANDO_PECA'" class="badge badge-blue">Aguardando Peça</span>
+                <span th:case="'CONCLUIDA'"       class="badge badge-green">Concluída</span>
+                <span th:case="'CANCELADA'"       class="badge badge-red">Cancelada</span>
+              </span>
+            </td>
+            <td>
+              <span class="text-muted text-sm"
+                    th:text="${#temporals.format(os.dataAbertura, 'dd/MM/yyyy HH:mm')}"></span>
+            </td>
+            <td>
+              <span style="font-weight:600; color:var(--accent);"
+                    th:text="${'R$ ' + #numbers.formatDecimal(os.totalGeral, 1, 2)}"></span>
+            </td>
+            <td onclick="event.stopPropagation()">
+              <div style="display:flex; gap:6px;">
+                <a th:href="@{'/os/' + ${os.id}}" class="btn btn-ghost btn-sm">Ver</a>
+                <a th:href="@{'/os/' + ${os.id} + '/pdf'}" class="btn btn-blue btn-sm">PDF</a>
+              </div>
+            </td>
+
+          </tr>
+          <tr th:if="${#lists.isEmpty(ordens)}">
+            <td colspan="8" style="text-align:center; padding:48px; color:var(--fg-muted);">
+              <div style="font-size:2.5rem; margin-bottom:10px;">📋</div>
+              <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700;
+                          text-transform:uppercase; color:var(--fg-dim);">
+                Nenhuma OS encontrada
+              </div>
+              <div style="margin-top:12px;">
+                <a href="/os/nova" class="btn btn-primary">Abrir primeira OS</a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-muted text-sm mt-3">
+      © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Mecanikas
+    </div>
+
+  </div>
+</body>
+</html>

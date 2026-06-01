@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatórios • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="fragments/sidebar :: sidebar"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="main-content">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Análises</div>
+        <div class="page-title">Relatórios</div>
+        <div class="page-subtitle">Resumo de peças e veículos da oficina</div>
+      </div>
+      <div class="d-flex gap-2">
+        <a th:href="@{/relatorios/pecas/pdf}"    class="btn btn-success">📄 PDF Peças</a>
+        <a th:href="@{/relatorios/veiculos/pdf}" class="btn btn-blue">🚗 PDF Veículos</a>
+      </div>
+    </div>
+
+    <!-- ── SEÇÃO PEÇAS ── -->
+    <div style="margin-bottom: 32px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <div style="font-family:var(--font-display); font-size:1.2rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">
+          ⚙ Estoque de Peças
+        </div>
+        <form method="get" th:action="@{/relatorios}" style="display:flex; gap:8px; flex:1; max-width:400px;">
+          <input type="text" name="searchPeca" placeholder="Buscar peça…"
+                 th:value="${searchPeca}" class="form-input" />
+          <button type="submit" class="btn btn-ghost">Buscar</button>
+        </form>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Código</th>
+              <th>Quantidade</th>
+              <th>Preço Unit. (R$)</th>
+              <th>Valor Total (R$)</th>
+              <th>Cadastro</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="p : ${pecas}">
+              <td style="font-weight:600;" th:text="${p.nome}"></td>
+              <td><span class="text-muted text-sm" th:text="${p.codigo}"></span></td>
+              <td>
+                <span th:classappend="${p.quantidade <= 5} ? 'text-red' : 'text-green'"
+                      style="font-weight:600;" th:text="${p.quantidade}"></span>
+              </td>
+              <td th:text="${p.precoUnitario}"></td>
+              <td>
+                <span style="font-weight:600; color:var(--accent);" th:text="${p.valorTotal}"></span>
+              </td>
+              <td><span class="text-muted text-sm" th:text="${p.dataCadastro}"></span></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pecas)}">
+              <td colspan="6" style="text-align:center; padding:32px; color:var(--fg-muted);">
+                Nenhuma peça encontrada.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── SEÇÃO VEÍCULOS ── -->
+    <div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <div style="font-family:var(--font-display); font-size:1.2rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">
+          🚗 Veículos em Atendimento
+        </div>
+        <form method="get" th:action="@{/relatorios}" style="display:flex; gap:8px; flex:1; max-width:400px;">
+          <input type="text" name="searchVeiculo" placeholder="Buscar veículo…"
+                 th:value="${searchVeiculo}" class="form-input" />
+          <button type="submit" class="btn btn-ghost">Buscar</button>
+        </form>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Marca / Modelo</th>
+              <th>Ano</th>
+              <th>Placa</th>
+              <th>Status</th>
+              <th>Cliente</th>
+              <th>Cadastro</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="v : ${veiculos}">
+              <td>
+                <span style="font-weight:600;" th:text="${v.marca + ' ' + v.modelo}"></span>
+              </td>
+              <td th:text="${v.ano}"></td>
+              <td>
+                <span style="font-family:var(--font-display); font-size:0.83rem; letter-spacing:0.06em; color:var(--fg-muted);"
+                      th:text="${v.placa}"></span>
+              </td>
+              <td>
+                <span th:if="${v.status.toString() == 'EM_MANUTENCAO'}"          class="badge badge-orange">Em Manutenção</span>
+                <span th:if="${v.status.toString() == 'AGUARDANDO_PECA'}"        class="badge badge-blue">Aguardando Peça</span>
+                <span th:if="${v.status.toString() == 'MANUTENCAO_FINALIZADA'}"  class="badge badge-green">Finalizado</span>
+              </td>
+              <td th:text="${v.cliente}"></td>
+              <td><span class="text-muted text-sm" th:text="${v.dataCadastro}"></span></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(veiculos)}">
+              <td colspan="6" style="text-align:center; padding:32px; color:var(--fg-muted);">
+                Nenhum veículo encontrado.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
