@@ -24,7 +24,7 @@
       <a th:href="@{/veiculos/cadastro}" class="btn btn-primary">+ Novo Veículo</a>
     </div>
 
-    <!-- Stats Row: usa th:with para calcular contagens compatíveis com Thymeleaf 3 -->
+    <!-- Stats Row -->
     <div class="stats-row"
          th:with="
            totalManutencao=${#lists.size(veiculos.?[status.name() == 'EM_MANUTENCAO'])},
@@ -118,13 +118,13 @@
           </div>
         </div>
 
+        <!-- Ações: abrir OS, ver fotos, editar -->
         <div class="veiculo-card-footer">
-          <button type="button"
-                  th:onclick="'abrirModal(' + ${veiculo.id} + ')'"
-                  class="btn btn-blue btn-sm" style="flex:1;">
-            ⚙ Usar Peça
-          </button>
-          <a th:href="@{'/veiculos/editar/' + ${veiculo.id}}" class="btn btn-ghost btn-sm">✏</a>
+          <a th:href="@{/os/nova}" class="btn btn-blue btn-sm" style="flex:1; justify-content:center;">
+            📋 Nova OS
+          </a>
+          <a th:href="@{'/fotos/veiculo/' + ${veiculo.id}}" class="btn btn-ghost btn-sm" title="Fotos">📷</a>
+          <a th:href="@{'/veiculos/editar/' + ${veiculo.id}}" class="btn btn-ghost btn-sm" title="Editar">✏</a>
         </div>
 
       </div>
@@ -144,49 +144,6 @@
 
     </div>
   </div>
-
-  <!-- Modal Adicionar Peça -->
-  <div id="modalPeca" class="modal-overlay">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-title">⚙ Adicionar Peça</div>
-        <div class="modal-subtitle">Selecione a peça e a quantidade utilizada</div>
-      </div>
-      <form id="formPeca" method="post" class="modal-form">
-        <div class="form-group">
-          <label class="form-label">Peça</label>
-          <select name="pecaId" class="form-select" required>
-            <option value="" disabled selected>Selecione uma peça…</option>
-            <option th:each="peca : ${pecas}"
-                    th:value="${peca.id}"
-                    th:text="${peca.nome + ' (' + peca.quantidade + ' disponível)'}">
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Quantidade Usada</label>
-          <input type="number" name="quantidadeUsada" class="form-input" min="1" placeholder="Ex: 2" required />
-        </div>
-        <div class="modal-actions">
-          <button type="submit" class="btn btn-success" style="flex:1;">✔ Confirmar</button>
-          <button type="button" onclick="fecharModal()" class="btn btn-danger" style="flex:1;">✕ Cancelar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    function abrirModal(idVeiculo) {
-      document.getElementById('modalPeca').classList.add('open');
-      document.getElementById('formPeca').action = '/veiculos/' + idVeiculo + '/adicionar-peca';
-    }
-    function fecharModal() {
-      document.getElementById('modalPeca').classList.remove('open');
-    }
-    document.getElementById('modalPeca').addEventListener('click', function(e) {
-      if (e.target === this) fecharModal();
-    });
-  </script>
 
 </body>
 </html>

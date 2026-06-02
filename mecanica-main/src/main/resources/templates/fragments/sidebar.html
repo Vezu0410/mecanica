@@ -7,57 +7,30 @@
   <div class="sidebar-brand">
     <div class="sidebar-brand-icon">🔧</div>
     <div>
-      <div class="sidebar-brand-name">Mecanikas</div>
+      <div class="sidebar-brand-name">AutoBot</div>
       <div class="sidebar-brand-sub">Gestão de Oficina</div>
     </div>
   </div>
 
   <div class="sidebar-nav">
-
     <span class="sidebar-section-label">Principal</span>
-
-    <a th:href="@{/menu}" class="sidebar-link">
-      <span class="sidebar-link-icon">🏠</span> Painel
-    </a>
-
-    <a th:href="@{/os}" class="sidebar-link">
-      <span class="sidebar-link-icon">📋</span> Ordens de Serviço
-    </a>
+    <a th:href="@{/menu}" class="sidebar-link"><span class="sidebar-link-icon">🏠</span> Painel</a>
+    <a th:href="@{/agenda}" class="sidebar-link"><span class="sidebar-link-icon">📅</span> Agenda</a>
+    <a th:href="@{/os}" class="sidebar-link"><span class="sidebar-link-icon">📋</span> Ordens de Serviço</a>
 
     <span class="sidebar-section-label">Cadastros</span>
-
-    <a th:href="@{/clientes/listar}" class="sidebar-link">
-      <span class="sidebar-link-icon">👤</span> Clientes
-    </a>
-
-    <a th:href="@{/veiculos/lista}" class="sidebar-link">
-      <span class="sidebar-link-icon">🚗</span> Veículos
-    </a>
-
-    <a th:href="@{/pecas/lista}" class="sidebar-link">
-      <span class="sidebar-link-icon">⚙️</span> Estoque
-    </a>
-
-    <a th:href="@{/funcionarios/cadastrar}" class="sidebar-link">
-      <span class="sidebar-link-icon">👷</span> Funcionários
-    </a>
+    <a th:href="@{/clientes/listar}" class="sidebar-link"><span class="sidebar-link-icon">👤</span> Clientes</a>
+    <a th:href="@{/veiculos/lista}" class="sidebar-link"><span class="sidebar-link-icon">🚗</span> Veículos</a>
+    <a th:href="@{/pecas/lista}" class="sidebar-link"><span class="sidebar-link-icon">⚙️</span> Estoque</a>
+    <a th:href="@{/funcionarios/cadastrar}" class="sidebar-link"><span class="sidebar-link-icon">👷</span> Funcionários</a>
 
     <span class="sidebar-section-label">Relatórios</span>
-
-    <a th:href="@{/relatorios}" class="sidebar-link">
-      <span class="sidebar-link-icon">📊</span> Relatórios
-    </a>
-
-    <a th:href="@{/relatorios/pecas-por-veiculo}" class="sidebar-link">
-      <span class="sidebar-link-icon">🔩</span> Peças por Veículo
-    </a>
-
+    <a th:href="@{/relatorios}" class="sidebar-link"><span class="sidebar-link-icon">📊</span> Relatórios</a>
+    <a th:href="@{/relatorios/pecas-por-veiculo}" class="sidebar-link"><span class="sidebar-link-icon">🔩</span> Peças por Veículo</a>
   </div>
 
   <div class="sidebar-footer">
-    <a th:href="@{/logout}" class="sidebar-logout">
-      <span>🚪</span> Sair do Sistema
-    </a>
+    <a th:href="@{/logout}" class="sidebar-logout"><span>🚪</span> Sair do Sistema</a>
   </div>
 
 </nav>

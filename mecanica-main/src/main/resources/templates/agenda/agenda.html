@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda • Garagem AutoBot</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <style>
+    .agenda-nav { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:20px; }
+    .agenda-data { font-family:var(--font-display); font-size:1.3rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; text-align:center; min-width:240px; }
+    .agenda-data .dia-semana { display:block; font-size:0.8rem; font-weight:500; color:var(--fg-muted); text-transform:capitalize; letter-spacing:normal; }
+    .periodos-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .periodo-col { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
+    .periodo-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+    .periodo-titulo { font-family:var(--font-display); font-size:1.1rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+    .ag-card { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; margin-bottom:10px; border-left:3px solid var(--accent); }
+    .ag-card.status-compareceu { border-left-color:var(--green); opacity:0.7; }
+    .ag-card.status-cancelado { border-left-color:var(--red); opacity:0.6; }
+    .ag-card.status-nao_compareceu { border-left-color:var(--fg-dim); opacity:0.6; }
+    .ag-card:last-child { margin-bottom:0; }
+    .ag-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+    .ag-cliente { font-weight:600; font-size:0.95rem; }
+    .ag-servico { font-size:0.85rem; color:var(--fg-muted); margin-bottom:6px; line-height:1.4; }
+    .ag-meta { font-size:0.8rem; color:var(--fg-muted); display:flex; flex-direction:column; gap:3px; }
+    .ag-meta strong { color:var(--fg); font-weight:500; }
+    .ag-actions { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+    .periodo-vazio { text-align:center; padding:28px 0; color:var(--fg-dim); font-size:0.85rem; }
+    @media (max-width:768px) {
+      .periodos-grid { grid-template-columns:1fr; }
+      .agenda-data { min-width:auto; font-size:1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <div class="main-content">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Operação</div>
+        <div class="page-title">Agenda</div>
+        <div class="page-subtitle">Agendamentos da oficina por período</div>
+      </div>
+      <a th:href="@{/agenda/novo(data=${dataAlvo})}" class="btn btn-primary">+ Novo Agendamento</a>
+    </div>
+
+    <div th:if="${sucesso}" class="alert alert-success" style="margin-bottom:16px;" th:text="${sucesso}"></div>
+    <div th:if="${erro}"    class="alert alert-error"   style="margin-bottom:16px;" th:text="${erro}"></div>
+
+    <!-- Navegação entre dias -->
+    <div class="agenda-nav">
+      <a th:href="@{/agenda(data=${dataAnterior})}" class="btn btn-ghost">‹ Dia anterior</a>
+      <div class="agenda-data">
+        <span th:text="${#temporals.format(dataAlvo, 'dd/MM/yyyy')}">01/01/2026</span>
+        <span class="dia-semana" th:text="${#temporals.format(dataAlvo, 'EEEE')}">segunda-feira</span>
+      </div>
+      <a th:href="@{/agenda(data=${dataProxima})}" class="btn btn-ghost">Próximo dia ›</a>
+    </div>
+
+    <div style="text-align:center; margin-bottom:20px;" th:if="${dataAlvo != hoje}">
+      <a th:href="@{/agenda(data=${hoje})}" class="btn btn-ghost btn-sm">↩ Voltar para hoje</a>
+    </div>
+
+    <!-- Grade Manhã / Tarde -->
+    <div class="periodos-grid">
+
+      <!-- ════════ MANHÃ ════════ -->
+      <div class="periodo-col">
+        <div class="periodo-header">
+          <div class="periodo-titulo">☀️ Manhã</div>
+          <span class="badge badge-yellow" th:text="${#lists.size(manha)} + ' agend.'">0</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(manha)}" class="periodo-vazio">
+          Nenhum agendamento para a manhã
+        </div>
+
+        <div th:each="ag : ${manha}"
+             th:class="'ag-card status-' + ${#strings.toLowerCase(ag.status.name())}">
+
+          <div class="ag-card-top">
+            <div class="ag-cliente" th:text="${ag.cliente.nome}">Cliente</div>
+            <span th:switch="${ag.status.name()}">
+              <span th:case="'AGENDADO'"       class="badge badge-yellow">Agendado</span>
+              <span th:case="'COMPARECEU'"     class="badge badge-green">Compareceu</span>
+              <span th:case="'NAO_COMPARECEU'" class="badge badge-red">Faltou</span>
+              <span th:case="'CANCELADO'"      class="badge badge-red">Cancelado</span>
+            </span>
+          </div>
+
+          <div class="ag-servico" th:text="${ag.servicoSolicitado}">Serviço</div>
+
+          <div class="ag-meta">
+            <span th:if="${ag.veiculo != null}">
+              🚗 <strong th:text="${ag.veiculo.marca + ' ' + ag.veiculo.modelo + ' — ' + ag.veiculo.placa}"></strong>
+            </span>
+            <span th:if="${ag.veiculo == null}" style="color:var(--orange);">🚗 Veículo a definir na chegada</span>
+            <span th:if="${ag.telefoneContato != null and !#strings.isEmpty(ag.telefoneContato)}">
+              📞 <strong th:text="${ag.telefoneContato}"></strong>
+            </span>
+          </div>
+
+          <div class="ag-actions" th:if="${ag.status.name() == 'AGENDADO'}">
+            <form th:if="${ag.veiculo != null}"
+                  th:action="@{'/agenda/' + ${ag.id} + '/carro-chegou'}" method="post" style="flex:1;">
+              <input type="hidden" name="veiculoId" th:value="${ag.veiculo.id}" />
+              <button type="submit" class="btn btn-success btn-sm w-full">✔ Carro chegou</button>
+            </form>
+            <form th:if="${ag.veiculo == null}"
+                  th:action="@{'/agenda/' + ${ag.id} + '/carro-chegou'}" method="post"
+                  style="flex:1; display:flex; gap:6px; flex-wrap:wrap;">
+              <select name="veiculoId" class="form-select" required style="flex:1; min-width:140px; font-size:0.82rem; padding:7px 10px;">
+                <option value="" disabled selected>Veículo do cliente…</option>
+                <option th:each="v : ${ag.cliente.veiculos}" th:value="${v.id}"
+                        th:text="${v.marca + ' ' + v.modelo + ' — ' + v.placa}"></option>
+              </select>
+              <button type="submit" class="btn btn-success btn-sm">✔ Chegou</button>
+            </form>
+            <form th:action="@{'/agenda/' + ${ag.id} + '/nao-compareceu'}" method="post">
+              <input type="hidden" name="data" th:value="${ag.dataAgendada}" />
+              <button type="submit" class="btn btn-ghost btn-sm" title="Não compareceu">✕</button>
+            </form>
+            <form th:action="@{'/agenda/' + ${ag.id} + '/cancelar'}" method="post"
+                  onsubmit="return confirm('Cancelar este agendamento?')">
+              <input type="hidden" name="data" th:value="${ag.dataAgendada}" />
+              <button type="submit" class="btn btn-danger btn-sm" title="Cancelar">🗑</button>
+            </form>
+          </div>
+
+          <div class="ag-actions" th:if="${ag.status.name() == 'COMPARECEU' and ag.osGeradaId != null}">
+            <a th:href="@{'/os/' + ${ag.osGeradaId}}" class="btn btn-blue btn-sm w-full">Ver OS gerada →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════════ TARDE ════════ -->
+      <div class="periodo-col">
+        <div class="periodo-header">
+          <div class="periodo-titulo">🌤️ Tarde</div>
+          <span class="badge badge-blue" th:text="${#lists.size(tarde)} + ' agend.'">0</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(tarde)}" class="periodo-vazio">
+          Nenhum agendamento para a tarde
+        </div>
+
+        <div th:each="ag : ${tarde}"
+             th:class="'ag-card status-' + ${#strings.toLowerCase(ag.status.name())}">
+
+          <div class="ag-card-top">
+            <div class="ag-cliente" th:text="${ag.cliente.nome}">Cliente</div>
+            <span th:switch="${ag.status.name()}">
+              <span th:case="'AGENDADO'"       class="badge badge-yellow">Agendado</span>
+              <span th:case="'COMPARECEU'"     class="badge badge-green">Compareceu</span>
+              <span th:case="'NAO_COMPARECEU'" class="badge badge-red">Faltou</span>
+              <span th:case="'CANCELADO'"      class="badge badge-red">Cancelado</span>
+            </span>
+          </div>
+
+          <div class="ag-servico" th:text="${ag.servicoSolicitado}">Serviço</div>
+
+          <div class="ag-meta">
+            <span th:if="${ag.veiculo != null}">
+              🚗 <strong th:text="${ag.veiculo.marca + ' ' + ag.veiculo.modelo + ' — ' + ag.veiculo.placa}"></strong>
+            </span>
+            <span th:if="${ag.veiculo == null}" style="color:var(--orange);">🚗 Veículo a definir na chegada</span>
+            <span th:if="${ag.telefoneContato != null and !#strings.isEmpty(ag.telefoneContato)}">
+              📞 <strong th:text="${ag.telefoneContato}"></strong>
+            </span>
+          </div>
+
+          <div class="ag-actions" th:if="${ag.status.name() == 'AGENDADO'}">
+            <form th:if="${ag.veiculo != null}"
+                  th:action="@{'/agenda/' + ${ag.id} + '/carro-chegou'}" method="post" style="flex:1;">
+              <input type="hidden" name="veiculoId" th:value="${ag.veiculo.id}" />
+              <button type="submit" class="btn btn-success btn-sm w-full">✔ Carro chegou</button>
+            </form>
+            <form th:if="${ag.veiculo == null}"
+                  th:action="@{'/agenda/' + ${ag.id} + '/carro-chegou'}" method="post"
+                  style="flex:1; display:flex; gap:6px; flex-wrap:wrap;">
+              <select name="veiculoId" class="form-select" required style="flex:1; min-width:140px; font-size:0.82rem; padding:7px 10px;">
+                <option value="" disabled selected>Veículo do cliente…</option>
+                <option th:each="v : ${ag.cliente.veiculos}" th:value="${v.id}"
+                        th:text="${v.marca + ' ' + v.modelo + ' — ' + v.placa}"></option>
+              </select>
+              <button type="submit" class="btn btn-success btn-sm">✔ Chegou</button>
+            </form>
+            <form th:action="@{'/agenda/' + ${ag.id} + '/nao-compareceu'}" method="post">
+              <input type="hidden" name="data" th:value="${ag.dataAgendada}" />
+              <button type="submit" class="btn btn-ghost btn-sm" title="Não compareceu">✕</button>
+            </form>
+            <form th:action="@{'/agenda/' + ${ag.id} + '/cancelar'}" method="post"
+                  onsubmit="return confirm('Cancelar este agendamento?')">
+              <input type="hidden" name="data" th:value="${ag.dataAgendada}" />
+              <button type="submit" class="btn btn-danger btn-sm" title="Cancelar">🗑</button>
+            </form>
+          </div>
+
+          <div class="ag-actions" th:if="${ag.status.name() == 'COMPARECEU' and ag.osGeradaId != null}">
+            <a th:href="@{'/os/' + ${ag.osGeradaId}}" class="btn btn-blue btn-sm w-full">Ver OS gerada →</a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="text-muted text-sm mt-3">
+      © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Garagem AutoBot
+    </div>
+
+  </div>
+
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+</body>
+</html>

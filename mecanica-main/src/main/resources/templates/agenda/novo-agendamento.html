@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novo Agendamento • Garagem AutoBot</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <style>
+    .periodo-radios { display: flex; gap: 10px; }
+    .periodo-radio {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      background: var(--surface-2);
+      color: var(--fg-muted);
+      user-select: none;
+    }
+    .periodo-radio.ativo {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+    .periodo-radio input { display: none; }
+  </style>
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <div class="form-page-wrapper" style="align-items:flex-start;">
+    <div class="form-card" style="max-width:620px;">
+
+      <div class="form-card-header">
+        <div class="page-eyebrow">Agenda</div>
+        <div class="form-card-title">Novo Agendamento</div>
+        <div class="form-card-subtitle">Marque o horário do cliente na oficina</div>
+      </div>
+
+      <div th:if="${erro}" class="alert alert-error" style="margin-bottom:20px;" th:text="${erro}"></div>
+
+      <form th:action="@{/agenda/salvar}" method="post">
+
+        <div class="form-body">
+
+          <!-- Cliente -->
+          <div class="form-group">
+            <label class="form-label">Cliente <span style="color:var(--red);">*</span></label>
+            <select name="clienteId" id="sel-cliente" class="form-select" required
+                    onchange="carregarVeiculos(this.value); preencherTelefone(this.value)">
+              <option value="">Selecione o cliente...</option>
+              <option th:each="c : ${clientes}"
+                      th:value="${c.id}"
+                      th:text="${c.nome}"
+                      th:attr="data-tel=${c.telefone}"></option>
+            </select>
+          </div>
+
+          <!-- Veículo (opcional) -->
+          <div class="form-group">
+            <label class="form-label">Veículo <span class="text-muted text-sm">(opcional)</span></label>
+            <select name="veiculoId" id="sel-veiculo" class="form-select">
+              <option value="">Definir na chegada do carro</option>
+            </select>
+            <span class="text-muted text-sm">Se o cliente não souber qual carro ainda, deixe em branco.</span>
+          </div>
+
+          <!-- Data e Período -->
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Data <span style="color:var(--red);">*</span></label>
+              <input type="date" name="dataAgendada" class="form-input"
+                     th:value="${dataPreenchida}" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Período <span style="color:var(--red);">*</span></label>
+              <div class="periodo-radios">
+                <label class="periodo-radio ativo" id="radio-manha" onclick="selecionarPeriodo('MANHA')">
+                  <input type="radio" name="periodo" value="MANHA" checked /> ☀️ Manhã
+                </label>
+                <label class="periodo-radio" id="radio-tarde" onclick="selecionarPeriodo('TARDE')">
+                  <input type="radio" name="periodo" value="TARDE" /> 🌤️ Tarde
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Serviço solicitado -->
+          <div class="form-group">
+            <label class="form-label">Serviço Solicitado <span style="color:var(--red);">*</span></label>
+            <textarea name="servicoSolicitado" class="form-input" rows="2"
+                      placeholder="Ex: Revisão completa, troca de óleo, barulho no motor..."
+                      required style="resize:vertical;"></textarea>
+          </div>
+
+          <!-- Telefone de contato -->
+          <div class="form-group">
+            <label class="form-label">Telefone de Contato</label>
+            <input type="text" name="telefoneContato" id="input-telefone" class="form-input"
+                   placeholder="(00) 00000-0000" />
+            <span class="text-muted text-sm">Preenchido automaticamente com o telefone do cliente.</span>
+          </div>
+
+          <!-- Observações -->
+          <div class="form-group">
+            <label class="form-label">Observações (opcional)</label>
+            <textarea name="observacoes" class="form-input" rows="2"
+                      placeholder="Notas adicionais sobre o agendamento..."
+                      style="resize:vertical;"></textarea>
+          </div>
+
+        </div>
+
+        <div class="form-footer">
+          <a href="/agenda" class="btn btn-ghost">← Cancelar</a>
+          <button type="submit" class="btn btn-primary">Salvar Agendamento</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+
+    // Mapa de veículos por cliente
+    const veiculosPorCliente = {};
+    /*[# th:each="v : ${veiculos}"]*/
+    (function() {
+      const cid = /*[[${v.cliente.id}]]*/ 0;
+      const vid = /*[[${v.id}]]*/ 0;
+      const txt = /*[[${v.marca + ' ' + v.modelo + ' — ' + v.placa}]]*/ '';
+      if (!veiculosPorCliente[cid]) veiculosPorCliente[cid] = [];
+      veiculosPorCliente[cid].push({ id: vid, texto: txt });
+    })();
+    /*[/]*/
+
+    function carregarVeiculos(clienteId) {
+      const sel = document.getElementById('sel-veiculo');
+      sel.innerHTML = '<option value="">Definir na chegada do carro</option>';
+      const lista = veiculosPorCliente[clienteId] || [];
+      lista.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.textContent = v.texto;
+        sel.appendChild(opt);
+      });
+    }
+
+    function preencherTelefone(clienteId) {
+      const sel = document.getElementById('sel-cliente');
+      const opt = sel.options[sel.selectedIndex];
+      const tel = opt ? opt.getAttribute('data-tel') : '';
+      const campo = document.getElementById('input-telefone');
+      if (tel && tel !== 'null') campo.value = tel;
+    }
+
+    function selecionarPeriodo(valor) {
+      document.getElementById('radio-manha').classList.toggle('ativo', valor === 'MANHA');
+      document.getElementById('radio-tarde').classList.toggle('ativo', valor === 'TARDE');
+    }
+
+    /*]]>*/
+  </script>
+
+</body>
+</html>

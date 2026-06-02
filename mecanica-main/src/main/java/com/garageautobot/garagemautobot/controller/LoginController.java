@@ -2,7 +2,7 @@ package com.garageautobot.garagemautobot.controller;
 
 import com.garageautobot.garagemautobot.entities.Funcionario;
 import com.garageautobot.garagemautobot.entities.LoginForm;
-import com.garageautobot.garagemautobot.repositories.FuncionarioRepository;
+import com.garageautobot.garagemautobot.services.FuncionarioService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class LoginController {
 
     @Autowired
-    private FuncionarioRepository funcionarioRepository;
+    private FuncionarioService funcionarioService;
 
     // Página de login
     @GetMapping("/login")
@@ -24,16 +24,17 @@ public class LoginController {
         return "login";
     }
 
-    // Processa login
+    // Processa login — agora usa autenticação com BCrypt
     @PostMapping("/login")
-    public String login(@ModelAttribute("loginForm") LoginForm form, Model model, HttpSession session) {
+    public String login(@ModelAttribute("loginForm") LoginForm form,
+                        Model model, HttpSession session) {
+
         Optional<Funcionario> funcionarioOpt =
-                funcionarioRepository.findByCpfAndSenha(form.getCpf(), form.getSenha());
+                funcionarioService.autenticar(form.getCpf(), form.getSenha());
 
         if (funcionarioOpt.isPresent()) {
-            // Guarda o usuário logado na sessão
             session.setAttribute("usuarioLogado", funcionarioOpt.get());
-            return "redirect:/menu"; 
+            return "redirect:/menu";
         } else {
             model.addAttribute("error", "CPF ou senha inválidos");
             return "login";
@@ -43,7 +44,7 @@ public class LoginController {
     // Logout
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        session.invalidate(); // limpa a sessão
+        session.invalidate();
         return "redirect:/login";
     }
 }

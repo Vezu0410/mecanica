@@ -14,11 +14,13 @@ public class WebConfig implements WebMvcConfigurer {
                     "/menu/**",
                     "/veiculos/**",
                     "/pecas/**",
-                    "/clientes/**",   // bug corrigido: espaço removido
+                    "/clientes/**",
                     "/relatorios/**",
-                    "/funcionarios/**",
+                   "/funcionarios/**",
                     "/editar/**",
-                    "/os/**"          // novo: protege rotas de Ordem de Serviço
+                    "/os/**",
+                    "/agenda/**",   // novo: protege rotas de Agenda
+                    "/fotos/**"     // protege rotas de Fotos
                 )
                 .excludePathPatterns(
                     "/login",

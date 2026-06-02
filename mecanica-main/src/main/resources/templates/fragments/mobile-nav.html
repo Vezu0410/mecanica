@@ -2,39 +2,22 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<!--
-  Barra de navegação inferior para mobile.
-  Uso em cada template:
-  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
-  pra n se perder dps em zé ruela
--->
 <nav th:fragment="mobile-nav" class="mobile-nav">
-
   <a th:href="@{/menu}" class="mobile-nav-item">
-    <span class="mobile-nav-icon">🏠</span>
-    <span>Painel</span>
+    <span class="mobile-nav-icon">🏠</span><span>Painel</span>
   </a>
-
+  <a th:href="@{/agenda}" class="mobile-nav-item">
+    <span class="mobile-nav-icon">📅</span><span>Agenda</span>
+  </a>
   <a th:href="@{/os}" class="mobile-nav-item">
-    <span class="mobile-nav-icon">📋</span>
-    <span>OS</span>
+    <span class="mobile-nav-icon">📋</span><span>OS</span>
   </a>
-
   <a th:href="@{/clientes/listar}" class="mobile-nav-item">
-    <span class="mobile-nav-icon">👤</span>
-    <span>Clientes</span>
+    <span class="mobile-nav-icon">👤</span><span>Clientes</span>
   </a>
-
   <a th:href="@{/veiculos/lista}" class="mobile-nav-item">
-    <span class="mobile-nav-icon">🚗</span>
-    <span>Veículos</span>
+    <span class="mobile-nav-icon">🚗</span><span>Veículos</span>
   </a>
-
-  <a th:href="@{/pecas/lista}" class="mobile-nav-item">
-    <span class="mobile-nav-icon">⚙️</span>
-    <span>Estoque</span>
-  </a>
-
 </nav>
 
 </body>

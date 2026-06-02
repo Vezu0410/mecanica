@@ -23,6 +23,10 @@
       <a href="/clientes/cadastrar" class="btn btn-primary">+ Novo Cliente</a>
     </div>
 
+    <!-- Mensagem flash de sucesso/erro -->
+    <div th:if="${message}" class="alert alert-success" style="margin-bottom:16px;" th:text="${message}"></div>
+    <div th:if="${error}"   class="alert alert-error"   style="margin-bottom:16px;" th:text="${error}"></div>
+
     <div class="table-wrapper">
       <table class="data-table">
         <thead>

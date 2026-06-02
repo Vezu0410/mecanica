@@ -26,10 +26,13 @@ public class FuncionarioController {
         try {
             funcionarioService.salvarFuncionario(funcionario);
             model.addAttribute("successMessage", "Funcionário cadastrado com sucesso!");
+            // Limpa o formulário após sucesso
+            model.addAttribute("funcionario", new Funcionario());
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "Erro ao cadastrar funcionário: " + e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
+            // Mantém os dados digitados para o usuário corrigir
+            model.addAttribute("funcionario", funcionario);
         }
-        model.addAttribute("funcionario", new Funcionario());
         return "cadastro-funcionario";
     }
 }
