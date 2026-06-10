@@ -6,6 +6,7 @@
   <title th:text="${os.numeroOS + ' • Garagem AutoBot'}">OS • Mecanikas</title>
   <link rel="stylesheet" th:href="@{/css/global.css}" />
   <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <link rel="stylesheet" th:href="@{/css/searchable-select.css}" />
   <style>
     .os-grid {
       display: grid;
@@ -170,14 +171,16 @@
           <!-- Formulário adicionar peça -->
           <form th:if="${os.status.name() != 'CONCLUIDA' and os.status.name() != 'CANCELADA'}"
                 th:action="@{'/os/' + ${os.id} + '/adicionar-peca'}" method="post"
-                style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
-            <select name="pecaId" class="form-select" required style="flex:2; min-width:180px;">
-              <option value="" disabled selected>Selecione a peça...</option>
-              <option th:each="p : ${pecas}"
-                      th:value="${p.id}"
-                      th:text="${p.nome + ' (Estq: ' + p.quantidade + ')'}">
-              </option>
-            </select>
+                style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; align-items:flex-start;">
+            <!-- Combo de peça com busca -->
+            <div class="ss-wrapper" style="flex:2; min-width:180px;"
+                 data-ss-required="true"
+                 th:attr="data-ss-options=${pecasJson}">
+              <input type="text" class="ss-input" autocomplete="off"
+                     placeholder="Buscar peça..." />
+              <input type="hidden" name="pecaId" value="" />
+              <div class="ss-dropdown"></div>
+            </div>
             <input type="number" name="quantidade" class="form-input" min="1" placeholder="Qtd."
                    required style="width:80px; flex-shrink:0;" />
             <button type="submit" class="btn btn-success">+ Adicionar</button>
@@ -312,9 +315,10 @@
         <!-- Alterar status -->
         <div class="info-section">
           <div class="info-section-title">Alterar Status</div>
-          <form th:action="@{'/os/' + ${os.id} + '/status'}" method="post">
+          <form th:action="@{'/os/' + ${os.id} + '/status'}" method="post"
+                onsubmit="return confirmarMudancaStatus(this)">
             <div class="form-group" style="margin-bottom:10px;">
-              <select name="novoStatus" class="form-select">
+              <select name="novoStatus" id="select-status-os" class="form-select">
                 <option th:each="s : ${statusOpcoes}"
                         th:value="${s.name()}"
                         th:text="${s.descricao}"
@@ -345,7 +349,19 @@
       document.getElementById('campoFixo').style.display = usarPerc ? 'none' : 'block';
       document.getElementById('campoPerc').style.display = usarPerc ? 'block' : 'none';
     }
+
+    // Pede confirmação ao cancelar a OS (ação sensível e de difícil reversão)
+    function confirmarMudancaStatus(form) {
+      const valor = document.getElementById('select-status-os').value;
+      if (valor === 'CANCELADA') {
+        return confirm('Tem certeza que deseja CANCELAR esta Ordem de Serviço?\n\n' +
+                       'Esta ação encerra a OS. As peças já adicionadas NÃO serão ' +
+                       'devolvidas ao estoque automaticamente.');
+      }
+      return true;
+    }
   </script>
 
+  <script th:src="@{/js/searchable-select.js}"></script>
 </body>
 </html>

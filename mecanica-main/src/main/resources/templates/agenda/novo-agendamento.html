@@ -6,6 +6,7 @@
   <title>Novo Agendamento • Garagem AutoBot</title>
   <link rel="stylesheet" th:href="@{/css/global.css}" />
   <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <link rel="stylesheet" th:href="@{/css/searchable-select.css}" />
   <style>
     .periodo-radios { display: flex; gap: 10px; }
     .periodo-radio {
@@ -48,17 +49,18 @@
 
         <div class="form-body">
 
-          <!-- Cliente -->
+          <!-- Cliente (combo com busca) -->
           <div class="form-group">
             <label class="form-label">Cliente <span style="color:var(--red);">*</span></label>
-            <select name="clienteId" id="sel-cliente" class="form-select" required
-                    onchange="carregarVeiculos(this.value); preencherTelefone(this.value)">
-              <option value="">Selecione o cliente...</option>
-              <option th:each="c : ${clientes}"
-                      th:value="${c.id}"
-                      th:text="${c.nome}"
-                      th:attr="data-tel=${c.telefone}"></option>
-            </select>
+            <div class="ss-wrapper"
+                 data-ss-required="true"
+                 data-ss-onselect="onClienteSelecionado"
+                 th:attr="data-ss-options=${clientesJson}">
+              <input type="text" class="ss-input" autocomplete="off"
+                     placeholder="Digite para buscar o cliente..." />
+              <input type="hidden" name="clienteId" id="hidden-cliente" value="" />
+              <div class="ss-dropdown"></div>
+            </div>
           </div>
 
           <!-- Veículo (opcional) -->
@@ -127,11 +129,16 @@
 
   <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
 
+  <script th:src="@{/js/searchable-select.js}"></script>
+
   <script th:inline="javascript">
     /*<![CDATA[*/
 
     // Mapa de veículos por cliente
     const veiculosPorCliente = {};
+    // Mapa de telefone por cliente
+    const telefonePorCliente = {};
+
     /*[# th:each="v : ${veiculos}"]*/
     (function() {
       const cid = /*[[${v.cliente.id}]]*/ 0;
@@ -141,6 +148,20 @@
       veiculosPorCliente[cid].push({ id: vid, texto: txt });
     })();
     /*[/]*/
+
+    /*[# th:each="c : ${clientes}"]*/
+    (function() {
+      const cid = /*[[${c.id}]]*/ 0;
+      const tel = /*[[${c.telefone}]]*/ '';
+      telefonePorCliente[cid] = tel;
+    })();
+    /*[/]*/
+
+    // Callback único disparado quando um cliente é selecionado no combo de busca
+    function onClienteSelecionado(clienteId) {
+      carregarVeiculos(clienteId);
+      preencherTelefone(clienteId);
+    }
 
     function carregarVeiculos(clienteId) {
       const sel = document.getElementById('sel-veiculo');
@@ -155,10 +176,9 @@
     }
 
     function preencherTelefone(clienteId) {
-      const sel = document.getElementById('sel-cliente');
-      const opt = sel.options[sel.selectedIndex];
-      const tel = opt ? opt.getAttribute('data-tel') : '';
       const campo = document.getElementById('input-telefone');
+      if (!clienteId) { return; }
+      const tel = telefonePorCliente[clienteId];
       if (tel && tel !== 'null') campo.value = tel;
     }
 

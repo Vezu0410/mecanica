@@ -55,8 +55,8 @@ public class FotoVeiculoService {
             os = osRepository.findById(osId).orElse(null);
         }
 
-        // Garante que o diretório existe
-        Path pasta = Paths.get(uploadDir);
+        // Garante que o diretório existe (caminho absoluto, mesmo usado na leitura)
+        Path pasta = Paths.get(uploadDir).toAbsolutePath().normalize();
         Files.createDirectories(pasta);
 
         for (MultipartFile arquivo : arquivos) {
@@ -106,8 +106,8 @@ public class FotoVeiculoService {
         FotoVeiculo foto = fotoRepository.findById(fotoId)
                 .orElseThrow(() -> new RuntimeException("Foto não encontrada: " + fotoId));
 
-        // Remove arquivo do disco
-        Path arquivo = Paths.get(uploadDir).resolve(foto.getNomeArquivo());
+        // Remove arquivo do disco (mesmo caminho absoluto usado para salvar/ler)
+        Path arquivo = Paths.get(uploadDir).toAbsolutePath().normalize().resolve(foto.getNomeArquivo());
         Files.deleteIfExists(arquivo);
 
         // Remove do banco
@@ -117,9 +117,12 @@ public class FotoVeiculoService {
     // ── SERVIR ARQUIVO ────────────────────────────────────────────
 
     public byte[] carregarArquivo(String nomeArquivo) throws IOException {
-        Path arquivo = Paths.get(uploadDir).resolve(nomeArquivo).normalize();
-        // Segurança: impede path traversal
-        if (!arquivo.startsWith(Paths.get(uploadDir).toAbsolutePath())) {
+        // Base absoluta da pasta de uploads
+        Path base = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path arquivo = base.resolve(nomeArquivo).normalize();
+
+        // Segurança: impede path traversal (../) — compara absoluto com absoluto
+        if (!arquivo.startsWith(base)) {
             throw new SecurityException("Acesso negado.");
         }
         return Files.readAllBytes(arquivo);

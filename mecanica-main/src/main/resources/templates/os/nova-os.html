@@ -6,6 +6,7 @@
   <title>Nova OS • Mecanikas</title>
   <link rel="stylesheet" th:href="@{/css/global.css}" />
   <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <link rel="stylesheet" th:href="@{/css/searchable-select.css}" />
   <style>
     .tab-bar {
       display: flex;
@@ -93,13 +94,18 @@
 
           <div class="form-body">
 
-            <!-- Seleção de cliente -->
+            <!-- Seleção de cliente (combo com busca) -->
             <div class="form-group">
               <label class="form-label">Cliente</label>
-              <select id="sel-cliente" class="form-select" onchange="onClienteChange(this.value)">
-                <option value="">Selecione um cliente...</option>
-                <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome}"></option>
-              </select>
+              <div class="ss-wrapper"
+                   data-ss-required="false"
+                   data-ss-onselect="onClienteChange"
+                   th:attr="data-ss-options=${clientesJson}">
+                <input type="text" class="ss-input" autocomplete="off"
+                       placeholder="Digite para buscar o cliente..." />
+                <input type="hidden" id="hidden-cliente-existente" value="" />
+                <div class="ss-dropdown"></div>
+              </div>
               <!-- Mostra quantos veículos o cliente tem -->
               <div id="cliente-badge" class="cliente-badge">
                 <span id="cliente-badge-txt"></span>
@@ -174,10 +180,14 @@
 
               <div class="form-group" style="margin-bottom:12px;">
                 <label class="form-label">Cliente <span style="color:var(--red);">*</span></label>
-                <select name="clienteId" class="form-select" required>
-                  <option value="">Selecione o cliente...</option>
-                  <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome}"></option>
-                </select>
+                <div class="ss-wrapper"
+                     data-ss-required="true"
+                     th:attr="data-ss-options=${clientesJson}">
+                  <input type="text" class="ss-input" autocomplete="off"
+                         placeholder="Digite para buscar o cliente..." />
+                  <input type="hidden" name="clienteId" value="" />
+                  <div class="ss-dropdown"></div>
+                </div>
               </div>
 
               <div class="form-grid">
@@ -236,6 +246,8 @@
     </div>
   </div>
 
+  <script th:src="@{/js/searchable-select.js}"></script>
+
   <script th:inline="javascript">
     /*<![CDATA[*/
 
@@ -260,7 +272,6 @@
     /*[/]*/
 
     // ── Referências DOM ────────────────────────────────────────────────
-    const selCliente   = document.getElementById('sel-cliente');
     const selVeiculo   = document.getElementById('sel-veiculo');
     const badgeEl      = document.getElementById('cliente-badge');
     const badgeTxt     = document.getElementById('cliente-badge-txt');

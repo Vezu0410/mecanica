@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backup • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="main-content">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Administração</div>
+        <div class="page-title">Backup do Sistema</div>
+        <div class="page-subtitle">Cópias de segurança do banco de dados</div>
+      </div>
+      <form th:action="@{/backup/gerar}" method="post">
+        <button type="submit" class="btn btn-primary">💾 Gerar Backup Agora</button>
+      </form>
+    </div>
+
+    <div th:if="${sucesso}" class="alert alert-success" style="margin-bottom:16px;" th:text="${sucesso}"></div>
+    <div th:if="${erro}"    class="alert alert-error"   style="margin-bottom:16px;" th:text="${erro}"></div>
+
+    <!-- Informações -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-bottom:24px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <span style="font-size:1.3rem;">🛡️</span>
+        <strong>Backup automático ativo</strong>
+      </div>
+      <div class="text-muted text-sm" style="line-height:1.5;">
+        O sistema gera um backup automaticamente todos os dias às <strong>3h da manhã</strong>.
+        São mantidos os <strong>7 backups mais recentes</strong> (os mais antigos são removidos automaticamente).
+        <br>
+        Pasta dos backups: <code style="background:var(--surface-2); padding:2px 6px; border-radius:4px;" th:text="${pasta}"></code>
+      </div>
+    </div>
+
+    <!-- Lista de backups -->
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Arquivo de Backup</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="b : ${backups}">
+            <td>
+              <span style="margin-right:8px;">📄</span>
+              <span style="font-family:var(--font-display);" th:text="${b}"></span>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(backups)}">
+            <td style="text-align:center; padding:32px; color:var(--fg-muted);">
+              Nenhum backup gerado ainda. Clique em "Gerar Backup Agora" ou aguarde o backup automático.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-muted text-sm" style="margin-top:16px;">
+      💡 Para restaurar um backup, use o arquivo .sql com o comando
+      <code style="background:var(--surface-2); padding:2px 6px; border-radius:4px;">mysql -u usuario -p &lt; arquivo.sql</code>
+      ou importe pelo MySQL Workbench.
+    </div>
+
+  </div>
+
+</body>
+</html>

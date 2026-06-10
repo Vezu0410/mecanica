@@ -42,12 +42,16 @@
             <div class="form-group">
               <label for="quantidade" class="form-label">Quantidade em Estoque</label>
               <input type="number" th:field="*{quantidade}" id="quantidade" class="form-input"
-                     min="0" placeholder="0" required />
+                     min="0" step="1" placeholder="0"
+                     title="Quantidade não pode ser negativa"
+                     required />
             </div>
             <div class="form-group">
               <label for="precoUnitario" class="form-label">Preço Unitário (R$)</label>
               <input type="number" step="0.01" th:field="*{precoUnitario}" id="precoUnitario"
-                     class="form-input" min="0" placeholder="0,00" required />
+                     class="form-input" min="0" placeholder="0,00"
+                     title="Preço não pode ser negativo"
+                     required />
             </div>
           </div>
 

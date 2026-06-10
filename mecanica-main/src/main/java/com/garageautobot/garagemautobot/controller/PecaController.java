@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/pecas")
@@ -18,10 +19,9 @@ public class PecaController {
 
     private final PecaService pecaService;
 
-
     @Autowired
     private VeiculoService veiculoService;
-    
+
     @Autowired
     public PecaController(PecaService pecaService) {
         this.pecaService = pecaService;
@@ -31,7 +31,7 @@ public class PecaController {
     @GetMapping("/cadastro")
     public String exibirFormulaarioCadastro(Model model) {
         model.addAttribute("peca", new Peca());
-        return "cadastro-peca"; // HTML do cadastro
+        return "cadastro-peca";
     }
 
     @PostMapping("/salvar")
@@ -40,13 +40,30 @@ public class PecaController {
         return "redirect:/pecas/lista";
     }
 
-    // Deletar peça
-    @GetMapping("/deletar/{id}")
-    public String deletar(@PathVariable Long id) {
-        pecaService.delete(id);
+    // INATIVAR peça (soft delete) - antes era "deletar"
+    @PostMapping("/inativar/{id}")
+    public String inativar(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            pecaService.inativar(id);
+            ra.addFlashAttribute("sucesso", "Peça inativada. Ela não aparece mais nas listas, mas o histórico foi preservado.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", "Erro ao inativar peça: " + e.getMessage());
+        }
         return "redirect:/pecas/lista";
     }
-    
+
+    // REATIVAR peça (somente admin - protegido no WebConfig)
+    @PostMapping("/reativar/{id}")
+    public String reativar(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            pecaService.reativar(id);
+            ra.addFlashAttribute("sucesso", "Peça reativada com sucesso!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", "Erro ao reativar peça: " + e.getMessage());
+        }
+        return "redirect:/pecas/lista";
+    }
+
     @GetMapping
     public String listarMenu(
             @RequestParam(required = false) String status,
@@ -70,5 +87,4 @@ public class PecaController {
 
         return "menu";
     }
-
 }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acesso Negado • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="main-content">
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;
+                min-height:70vh; text-align:center;">
+
+      <div style="font-size:4rem; margin-bottom:16px;">🔒</div>
+
+      <div style="font-family:var(--font-display); font-size:1.8rem; font-weight:700;
+                  text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;">
+        Acesso Restrito
+      </div>
+
+      <div class="text-muted" style="max-width:420px; font-size:0.95rem; line-height:1.5; margin-bottom:28px;">
+        Esta área é exclusiva para administradores. Seu nível de acesso atual
+        não permite visualizar ou modificar este recurso.
+        <br><br>
+        Se você precisa de acesso, fale com o administrador do sistema.
+      </div>
+
+      <a th:href="@{/menu}" class="btn btn-primary">← Voltar ao Painel</a>
+
+    </div>
+  </div>
+
+</body>
+</html>

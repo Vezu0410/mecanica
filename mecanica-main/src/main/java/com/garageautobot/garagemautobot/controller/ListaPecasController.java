@@ -27,28 +27,37 @@ public class ListaPecasController {
 
     @GetMapping("/pecas/lista")
     public String listarPecas(Model model) {
-        List<Peca> pecas = pecaService.findAll();
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         Locale ptBR = Locale.forLanguageTag("pt-BR");
 
-        List<Map<String, Object>> pecasFormatadas = pecas.stream().map(peca -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id",       peca.getId());
-            map.put("nome",     peca.getNome());
-            map.put("codigo",   peca.getCodigo());
-            map.put("quantidade", peca.getQuantidade());
-            map.put("precoUnitarioFormatado",
-                    String.format(ptBR, "%.2f", peca.getPrecoUnitario()));
-            map.put("valorTotalFormatado",
-                    String.format(ptBR, "%.2f", peca.getQuantidade() * peca.getPrecoUnitario()));
-            map.put("dataCadastro",
-                    peca.getDataCadastro().format(formatter));
-            return map;
-        }).collect(Collectors.toList());
+        // Peças ATIVAS (lista principal)
+        List<Map<String, Object>> pecasFormatadas = pecaService.findAll().stream()
+                .map(peca -> formatarPeca(peca, formatter, ptBR))
+                .collect(Collectors.toList());
+
+        // Peças INATIVAS (para o admin ver e reativar)
+        List<Map<String, Object>> pecasInativas = pecaService.findInativas().stream()
+                .map(peca -> formatarPeca(peca, formatter, ptBR))
+                .collect(Collectors.toList());
 
         model.addAttribute("pecas", pecasFormatadas);
+        model.addAttribute("pecasInativas", pecasInativas);
         return "lista-pecas";
+    }
+
+    private Map<String, Object> formatarPeca(Peca peca, DateTimeFormatter formatter, Locale ptBR) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id",       peca.getId());
+        map.put("nome",     peca.getNome());
+        map.put("codigo",   peca.getCodigo());
+        map.put("quantidade", peca.getQuantidade());
+        map.put("precoUnitarioFormatado",
+                String.format(ptBR, "%.2f", peca.getPrecoUnitario()));
+        map.put("valorTotalFormatado",
+                String.format(ptBR, "%.2f", peca.getQuantidade() * peca.getPrecoUnitario()));
+        map.put("dataCadastro",
+                peca.getDataCadastro().format(formatter));
+        return map;
     }
 
     @GetMapping("/pecas/editar/{id}")

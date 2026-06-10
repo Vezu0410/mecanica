@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ops! • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <style>
+    .erro-wrap {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:100vh; text-align:center; padding:24px;
+    }
+    .erro-codigo {
+      font-family:var(--font-display, sans-serif);
+      font-size:6rem; font-weight:800; line-height:1;
+      color:var(--accent, #f0b429);
+      letter-spacing:0.02em;
+    }
+    .erro-titulo {
+      font-family:var(--font-display, sans-serif);
+      font-size:1.6rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.04em; margin:12px 0 8px;
+    }
+    .erro-msg {
+      color:var(--fg-muted, #9aa); max-width:440px;
+      font-size:0.95rem; line-height:1.55; margin-bottom:30px;
+    }
+    .erro-acoes { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+    .erro-icone { font-size:3.4rem; margin-bottom:4px; }
+  </style>
+</head>
+<body>
+
+  <div class="erro-wrap">
+
+    <!-- Ícone muda conforme o tipo de erro -->
+    <div class="erro-icone" th:switch="${status}">
+      <span th:case="404">🔍</span>
+      <span th:case="403">🔒</span>
+      <span th:case="*">🔧</span>
+    </div>
+
+    <!-- Código do erro (404, 500, etc.) -->
+    <div class="erro-codigo" th:text="${status} ?: 'Ops'">500</div>
+
+    <!-- Título e mensagem mudam conforme o código -->
+    <div th:switch="${status}">
+      <div th:case="404">
+        <div class="erro-titulo">Página não encontrada</div>
+        <div class="erro-msg">
+          O endereço que você tentou acessar não existe ou foi movido.
+          Verifique o link ou volte para o painel.
+        </div>
+      </div>
+      <div th:case="403">
+        <div class="erro-titulo">Acesso negado</div>
+        <div class="erro-msg">
+          Você não tem permissão para acessar este recurso.
+          Se precisar de acesso, fale com o administrador.
+        </div>
+      </div>
+      <div th:case="*">
+        <div class="erro-titulo">Algo deu errado</div>
+        <div class="erro-msg">
+          Tivemos um problema ao processar sua solicitação. Já registramos o ocorrido.
+          Tente novamente em instantes — se persistir, avise o administrador.
+        </div>
+      </div>
+    </div>
+
+    <div class="erro-acoes">
+      <a href="javascript:history.back()" class="btn btn-ghost">← Voltar</a>
+      <a th:href="@{/menu}" class="btn btn-primary">🏠 Ir ao Painel</a>
+    </div>
+
+  </div>
+
+</body>
+</html>

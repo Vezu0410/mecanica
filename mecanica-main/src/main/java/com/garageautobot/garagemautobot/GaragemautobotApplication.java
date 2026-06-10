@@ -2,14 +2,13 @@ package com.garageautobot.garagemautobot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EntityScan("com.garageautobot.garagemautobot.entities")
+@EnableScheduling  // habilita o @Scheduled do backup automático
 public class GaragemautobotApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(GaragemautobotApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(GaragemautobotApplication.class, args);
+    }
 }

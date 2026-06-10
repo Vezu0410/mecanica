@@ -226,4 +226,41 @@ public class OrdemServicoService {
     public OrdemServico salvar(OrdemServico os) {
         return osRepository.save(os);
     }
+
+    // ── SINCRONIA: status do veículo alterado pelo painel ─────────
+
+    /**
+     * Quando o status do veículo é alterado diretamente pelo painel,
+     * sincroniza a OS ativa daquele veículo para manter coerência.
+     *
+     * Mapeamento de status do Veículo → status da OS:
+     *   EM_MANUTENCAO         → EM_ANDAMENTO
+     *   AGUARDANDO_PECA       → AGUARDANDO_PECA
+     *   MANUTENCAO_FINALIZADA → CONCLUIDA (e marca data de conclusão)
+     *
+     * Se o veículo não tem OS ativa, apenas o status do veículo muda
+     * (comportamento normal, sem efeito colateral).
+     */
+    @Transactional
+    public void sincronizarComStatusVeiculo(Long veiculoId, StatusVeiculo statusVeiculo) {
+        List<OrdemServico> ativas = osRepository.findOSAtivasDoVeiculo(veiculoId);
+
+        if (ativas.isEmpty()) {
+            return; // veículo sem OS ativa, nada a sincronizar
+        }
+
+        // Sincroniza a OS ativa mais recente
+        OrdemServico os = ativas.get(0);
+
+        switch (statusVeiculo) {
+            case EM_MANUTENCAO         -> os.setStatus(StatusOS.EM_ANDAMENTO);
+            case AGUARDANDO_PECA       -> os.setStatus(StatusOS.AGUARDANDO_PECA);
+            case MANUTENCAO_FINALIZADA -> {
+                os.setStatus(StatusOS.CONCLUIDA);
+                os.setDataConclusao(LocalDate.now());
+            }
+        }
+
+        osRepository.save(os);
+    }
 }

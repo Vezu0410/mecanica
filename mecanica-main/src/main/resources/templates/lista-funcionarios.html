@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Funcionários • Mecanikas</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <div class="main-content">
+
+    <div class="page-header">
+      <div class="page-title-group">
+        <div class="page-eyebrow">Cadastros</div>
+        <div class="page-title">Funcionários</div>
+        <div class="page-subtitle">Equipe com acesso ao sistema</div>
+      </div>
+      <a th:if="${session.usuarioLogado != null and session.usuarioLogado.admin}"
+         href="/funcionarios/cadastrar" class="btn btn-primary">+ Novo Funcionário</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" style="margin-bottom:16px;" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}"   class="alert alert-error"   style="margin-bottom:16px;" th:text="${errorMessage}"></div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>E-mail</th>
+            <th>Nível</th>
+            <th th:if="${session.usuarioLogado != null and session.usuarioLogado.admin}"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="f : ${funcionarios}">
+            <td style="font-weight:600;" th:text="${f.nome}"></td>
+            <td><span class="text-muted text-sm" th:text="${f.cpf}"></span></td>
+            <td th:text="${f.email}"></td>
+            <td>
+              <span th:if="${f.admin}" style="background:var(--accent,#f0b429); color:#1a1a1a; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">Administrador</span>
+              <span th:if="${!f.admin}" style="background:#2563eb; color:#fff; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">Funcionário</span>
+            </td>
+            <!-- Ações só para admin -->
+            <td th:if="${session.usuarioLogado != null and session.usuarioLogado.admin}">
+              <form th:action="@{'/funcionarios/inativar/' + ${f.id}}" method="post"
+                    onsubmit="return confirm('Inativar este funcionário? Ele não poderá mais acessar o sistema.')">
+                <button type="submit" class="btn btn-danger btn-sm" title="Inativar">🗑</button>
+              </form>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(funcionarios)}">
+            <td colspan="5" style="text-align:center; padding:40px; color:var(--fg-muted);">
+              Nenhum funcionário ativo.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ════════ FUNCIONÁRIOS INATIVOS (somente ADMIN) ════════ -->
+    <div th:if="${session.usuarioLogado != null and session.usuarioLogado.admin and !#lists.isEmpty(funcionariosInativos)}"
+         style="margin-top:32px;">
+      <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700;
+                  text-transform:uppercase; letter-spacing:0.04em; color:var(--fg-muted); margin-bottom:12px;">
+        🗄️ Funcionários Inativos
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr><th>Nome</th><th>CPF</th><th>Nível</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="f : ${funcionariosInativos}" style="opacity:0.6;">
+              <td th:text="${f.nome}"></td>
+              <td><span class="text-muted text-sm" th:text="${f.cpf}"></span></td>
+              <td>
+                <span th:if="${f.admin}" style="background:var(--accent,#f0b429); color:#1a1a1a; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">Administrador</span>
+                <span th:if="${!f.admin}" style="background:#2563eb; color:#fff; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">Funcionário</span>
+              </td>
+              <td>
+                <form th:action="@{'/funcionarios/reativar/' + ${f.id}}" method="post">
+                  <button type="submit" class="btn btn-success btn-sm">↩ Reativar</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="text-muted text-sm mt-3">
+      © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Mecanikas
+    </div>
+
+  </div>
+</body>
+</html>

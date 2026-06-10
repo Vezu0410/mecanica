@@ -22,7 +22,18 @@ public class PecaService {
         return pecaRepository.save(peca);
     }
 
+    // findAll agora retorna SÓ as peças ativas (uso normal em listas e combos)
     public List<Peca> findAll() {
+        return pecaRepository.findByAtivoTrue();
+    }
+
+    // Lista as peças inativas (para o admin gerenciar/reativar)
+    public List<Peca> findInativas() {
+        return pecaRepository.findByAtivoFalse();
+    }
+
+    // Inclui ativas + inativas (caso precise em algum relatório)
+    public List<Peca> findTodas() {
         return pecaRepository.findAll();
     }
 
@@ -30,8 +41,30 @@ public class PecaService {
         return pecaRepository.findById(id);
     }
 
-    public void delete(Long id) {
-        pecaRepository.deleteById(id);
+    // "delete" agora é INATIVAÇÃO (soft delete): preserva o histórico
+    public void inativar(Long id) {
+        Peca peca = pecaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada: " + id));
+
+        // Regra: não permite inativar peça que ainda tem estoque físico.
+        // O usuário precisa zerar o estoque antes (vender, usar ou ajustar).
+        if (peca.getQuantidade() > 0) {
+            throw new IllegalStateException(
+                "Não é possível inativar \"" + peca.getNome() + "\": ainda há " +
+                peca.getQuantidade() + " unidade(s) em estoque. " +
+                "Zere o estoque antes de inativar.");
+        }
+
+        peca.setAtivo(false);
+        pecaRepository.save(peca);
+    }
+
+    // Reativa uma peça (só admin)
+    public void reativar(Long id) {
+        Peca peca = pecaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada: " + id));
+        peca.setAtivo(true);
+        pecaRepository.save(peca);
     }
 
     public void entradaEstoque(Long id, int quantidade) {

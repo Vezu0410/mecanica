@@ -53,9 +53,14 @@
     <!-- Navegação entre dias -->
     <div class="agenda-nav">
       <a th:href="@{/agenda(data=${dataAnterior})}" class="btn btn-ghost">‹ Dia anterior</a>
-      <div class="agenda-data">
+      <div class="agenda-data" id="agenda-data-clicavel" title="Clique para escolher uma data"
+           style="cursor:pointer; position:relative;">
         <span th:text="${#temporals.format(dataAlvo, 'dd/MM/yyyy')}">01/01/2026</span>
         <span class="dia-semana" th:text="${#temporals.format(dataAlvo, 'EEEE')}">segunda-feira</span>
+        <span style="display:block; font-size:0.7rem; color:var(--accent); margin-top:2px;">📅 trocar data</span>
+        <!-- Input de data nativo, escondido, acionado ao clicar -->
+        <input type="date" id="seletor-data" th:value="${dataAlvo}"
+               style="position:absolute; opacity:0; width:1px; height:1px; bottom:0; left:50%; pointer-events:none;" />
       </div>
       <a th:href="@{/agenda(data=${dataProxima})}" class="btn btn-ghost">Próximo dia ›</a>
     </div>
@@ -216,6 +221,34 @@
   </div>
 
   <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+  <script>
+    (function () {
+      const areaData = document.getElementById('agenda-data-clicavel');
+      const seletor  = document.getElementById('seletor-data');
+      if (!areaData || !seletor) return;
+
+      // Ao clicar na data, abre o calendário nativo
+      areaData.addEventListener('click', function () {
+        // showPicker() abre o calendário direto (navegadores modernos);
+        // se não existir, foca no input como fallback
+        if (typeof seletor.showPicker === 'function') {
+          seletor.showPicker();
+        } else {
+          seletor.style.pointerEvents = 'auto';
+          seletor.focus();
+          seletor.click();
+        }
+      });
+
+      // Ao escolher uma data, navega para aquele dia
+      seletor.addEventListener('change', function () {
+        if (seletor.value) {
+          window.location.href = '/agenda?data=' + seletor.value;
+        }
+      });
+    })();
+  </script>
 
 </body>
 </html>

@@ -37,6 +37,17 @@ public class Funcionario {
 
     private LocalDate dataAdmissao;
 
+    // Nível de acesso do funcionário. Default FUNCIONARIO por segurança:
+    // ninguém vira admin sem ser promovido explicitamente.
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PapelFuncionario papel = PapelFuncionario.FUNCIONARIO;
+
+    // Soft delete: funcionário inativo não loga e some da lista, mas
+    // é preservado para manter o histórico de OS que ele abriu.
+    @Column(nullable = false)
+    private boolean ativo = true;
+
     public Funcionario() {}
 
     public Funcionario(String nome, String cpf, String senha, String email, Integer idade, String cep,
@@ -89,4 +100,15 @@ public class Funcionario {
 
     public LocalDate getDataAdmissao() { return dataAdmissao; }
     public void setDataAdmissao(LocalDate dataAdmissao) { this.dataAdmissao = dataAdmissao; }
+
+    public PapelFuncionario getPapel() { return papel; }
+    public void setPapel(PapelFuncionario papel) { this.papel = papel; }
+
+    // Atalho para checar se é administrador (usado em templates e interceptor)
+    public boolean isAdmin() {
+        return papel == PapelFuncionario.ADMIN;
+    }
+
+    public boolean isAtivo() { return ativo; }
+    public void setAtivo(boolean ativo) { this.ativo = ativo; }
 }

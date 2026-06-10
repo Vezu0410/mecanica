@@ -65,9 +65,35 @@ public class OrdemServicoController {
 
     @GetMapping("/nova")
     public String escolherTipo(Model model) {
-        model.addAttribute("clientes", clienteRepository.findAll());
+        var clientes = clienteRepository.findAll();
+        model.addAttribute("clientes", clientes);
         model.addAttribute("veiculos", veiculoRepository.findAll());
+
+        // JSON do combo de cliente com busca
+        model.addAttribute("clientesJson", ComboJson.gerar(
+                clientes,
+                Cliente::getId,
+                Cliente::getNome
+        ));
         return "os/nova-os";
+    }
+
+    // ── NOVA OS DIRETO DE UM VEÍCULO (vindo do card do painel) ───
+    // Tela enxuta: cliente e veículo já definidos, só pede a descrição.
+
+    @GetMapping("/nova/{veiculoId}")
+    public String novaOSdoVeiculo(@PathVariable Long veiculoId,
+                                  Model model,
+                                  RedirectAttributes ra) {
+        Veiculo veiculo = veiculoRepository.findById(veiculoId).orElse(null);
+
+        if (veiculo == null) {
+            ra.addFlashAttribute("erro", "Veículo não encontrado.");
+            return "redirect:/menu";
+        }
+
+        model.addAttribute("veiculo", veiculo);
+        return "os/nova-os-veiculo";
     }
 
     // ── ABRIR OS COM VEÍCULO EXISTENTE ───────────────────────────
@@ -118,9 +144,17 @@ public class OrdemServicoController {
         OrdemServico os = osService.findById(id)
                 .orElseThrow(() -> new RuntimeException("OS não encontrada: " + id));
 
+        var pecas = pecaRepository.findAll();
         model.addAttribute("os", os);
-        model.addAttribute("pecas", pecaRepository.findAll());
+        model.addAttribute("pecas", pecas);
         model.addAttribute("statusOpcoes", StatusOS.values());
+
+        // JSON do combo de peça com busca: "Nome (Cód: X — Estq: Y)"
+        model.addAttribute("pecasJson", ComboJson.gerar(
+                pecas,
+                p -> p.getId(),
+                p -> p.getNome() + " (Cód: " + p.getCodigo() + " — Estq: " + p.getQuantidade() + ")"
+        ));
         return "os/detalhe-os";
     }
 

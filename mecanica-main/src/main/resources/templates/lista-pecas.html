@@ -23,6 +23,9 @@
       <a href="/pecas/cadastro" class="btn btn-primary">+ Nova Peça</a>
     </div>
 
+    <div th:if="${sucesso}" class="alert alert-success" style="margin-bottom:16px;" th:text="${sucesso}"></div>
+    <div th:if="${erro}"    class="alert alert-error"   style="margin-bottom:16px;" th:text="${erro}"></div>
+
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
@@ -32,15 +35,15 @@
             <th>Qtd. Estoque</th>
             <th>Preço Unit. (R$)</th>
             <th>Cadastro</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          <tr th:each="peca : ${pecas}"
-              class="clickable"
-              th:onclick="'window.location.href=\'/pecas/editar/' + ${peca['id']} + '\';'">
+          <tr th:each="peca : ${pecas}">
 
             <td>
-              <span style="font-weight:600;" th:text="${peca['nome']}"></span>
+              <a th:href="@{'/pecas/editar/' + ${peca['id']}}" style="font-weight:600; color:var(--fg); text-decoration:none;"
+                 th:text="${peca['nome']}"></a>
             </td>
 
             <td>
@@ -50,7 +53,6 @@
             </td>
 
             <td>
-              <!-- quantidade é Integer — comparação segura com intValue -->
               <span th:with="qtd=${peca['quantidade']}"
                     th:classappend="${qtd != null and qtd <= 5} ? 'text-red' : 'text-green'"
                     style="font-weight:600;"
@@ -60,7 +62,6 @@
                     class="badge badge-red" style="margin-left:6px;">Baixo</span>
             </td>
 
-            <!-- precoUnitarioFormatado já vem como String do controller -->
             <td>
               <span th:text="${'R$ ' + peca['precoUnitarioFormatado']}"></span>
             </td>
@@ -69,14 +70,69 @@
               <span class="text-muted text-sm" th:text="${peca['dataCadastro']}"></span>
             </td>
 
+            <td>
+              <div style="display:flex; gap:6px;">
+                <a th:href="@{'/pecas/editar/' + ${peca['id']}}" class="btn btn-ghost btn-sm" title="Editar">✏</a>
+                <!-- Peça COM estoque: botão avisa que precisa zerar antes -->
+                <form th:if="${peca['quantidade'] > 0}"
+                      th:action="@{'/pecas/inativar/' + ${peca['id']}}" method="post"
+                      onsubmit="return confirm('Atenção: esta peça ainda tem estoque. O sistema não vai permitir inativá-la enquanto houver unidades. Deseja tentar mesmo assim?')">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Inativar (tem estoque)">🗑</button>
+                </form>
+                <!-- Peça SEM estoque: inativação normal -->
+                <form th:if="${peca['quantidade'] == 0}"
+                      th:action="@{'/pecas/inativar/' + ${peca['id']}}" method="post"
+                      onsubmit="return confirm('Inativar esta peça? Ela sairá das listas, mas o histórico será preservado. Um administrador pode reativá-la depois.')">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Inativar">🗑</button>
+                </form>
+              </div>
+            </td>
+
           </tr>
           <tr th:if="${#lists.isEmpty(pecas)}">
-            <td colspan="5" style="text-align:center; padding:40px; color:var(--fg-muted);">
+            <td colspan="6" style="text-align:center; padding:40px; color:var(--fg-muted);">
               Nenhuma peça cadastrada ainda.
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- ════════ SEÇÃO DE PEÇAS INATIVAS (somente ADMIN) ════════ -->
+    <div th:if="${session.usuarioLogado != null and session.usuarioLogado.admin and !#lists.isEmpty(pecasInativas)}"
+         style="margin-top:32px;">
+      <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700;
+                  text-transform:uppercase; letter-spacing:0.04em; color:var(--fg-muted); margin-bottom:12px;">
+        🗄️ Peças Inativas
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Código</th>
+              <th>Qtd.</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="peca : ${pecasInativas}" style="opacity:0.6;">
+              <td th:text="${peca['nome']}"></td>
+              <td>
+                <span style="font-family: var(--font-display); font-size:0.83rem;
+                             letter-spacing:0.05em; color:var(--fg-muted);"
+                      th:text="${peca['codigo']}"></span>
+              </td>
+              <td th:text="${peca['quantidade']}"></td>
+              <td>
+                <form th:action="@{'/pecas/reativar/' + ${peca['id']}}" method="post">
+                  <button type="submit" class="btn btn-success btn-sm">↩ Reativar</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="text-muted text-sm mt-3">

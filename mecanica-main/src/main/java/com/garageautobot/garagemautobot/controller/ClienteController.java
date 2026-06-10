@@ -2,6 +2,7 @@ package com.garageautobot.garagemautobot.controller;
 
 import com.garageautobot.garagemautobot.entities.Cliente;
 import com.garageautobot.garagemautobot.repositories.ClienteRepository;
+import com.garageautobot.garagemautobot.repositories.VeiculoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,9 @@ public class ClienteController {
 
     @Autowired
     private ClienteRepository clienteRepository;
+
+    @Autowired
+    private VeiculoRepository veiculoRepository;
 
     @GetMapping("/cadastrar")
     public String exibirFormulario(Model model) {
@@ -98,8 +102,47 @@ public class ClienteController {
 
     @GetMapping("/listar")
     public String listarClientes(Model model) {
-        model.addAttribute("clientes", clienteRepository.findAll());
+        model.addAttribute("clientes", clienteRepository.findByAtivoTrue());
+        model.addAttribute("clientesInativos", clienteRepository.findByAtivoFalse());
         return "clientes-lista";
+    }
+
+    // INATIVAR cliente (soft delete) com trava: não inativa se tiver veículo ativo
+    @PostMapping("/inativar/{id}")
+    public String inativar(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            Cliente cliente = clienteRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
+
+            long veiculosAtivos = veiculoRepository.countByClienteIdAndAtivoTrue(id);
+            if (veiculosAtivos > 0) {
+                throw new IllegalStateException(
+                    "Não é possível inativar este cliente: há " + veiculosAtivos +
+                    " veículo(s) ativo(s) vinculado(s). Inative os veículos primeiro.");
+            }
+
+            cliente.setAtivo(false);
+            clienteRepository.save(cliente);
+            ra.addFlashAttribute("message", "Cliente inativado. O histórico foi preservado.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/clientes/listar";
+    }
+
+    // REATIVAR cliente (somente admin - protegido no WebConfig)
+    @PostMapping("/reativar/{id}")
+    public String reativar(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            Cliente cliente = clienteRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
+            cliente.setAtivo(true);
+            clienteRepository.save(cliente);
+            ra.addFlashAttribute("message", "Cliente reativado com sucesso!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/clientes/listar";
     }
 
     @GetMapping("/editar/{id}")

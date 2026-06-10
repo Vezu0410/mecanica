@@ -28,6 +28,11 @@ public class Peca {
     @Column(nullable = false)
     private LocalDateTime dataCadastro = LocalDateTime.now();
 
+    // Soft delete: peça inativa some das listas/combos mas é preservada
+    // para não quebrar o histórico de OS antigas. Admin pode reativar.
+    @Column(nullable = false)
+    private boolean ativo = true;
+
     @OneToMany(mappedBy = "peca")
     private List<PecaUsada> pecasUsadas = new ArrayList<>();
 
@@ -64,6 +69,9 @@ public class Peca {
 
     public LocalDateTime getDataCadastro() { return dataCadastro; }
     public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }
+
+    public boolean isAtivo() { return ativo; }
+    public void setAtivo(boolean ativo) { this.ativo = ativo; }
 
     // 🔹 Métodos auxiliares para relatórios
     public double getValorTotalEstoque() {

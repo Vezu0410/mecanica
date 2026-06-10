@@ -35,12 +35,20 @@
             <div class="form-group">
               <label for="cpf" class="form-label">CPF (login)</label>
               <input type="text" th:field="*{cpf}" id="cpf" class="form-input"
-                     placeholder="00000000000" required />
+                     placeholder="Somente números"
+                     inputmode="numeric"
+                     pattern="[0-9]{11}"
+                     title="O CPF deve ter 11 dígitos numéricos"
+                     oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                     minlength="11" maxlength="11" required />
             </div>
             <div class="form-group">
               <label for="senha" class="form-label">Senha</label>
               <input type="password" th:field="*{senha}" id="senha" class="form-input"
-                     placeholder="Mínimo 6 caracteres" required />
+                     placeholder="Mínimo 6 caracteres"
+                     minlength="6"
+                     title="A senha deve ter no mínimo 6 caracteres"
+                     required />
             </div>
           </div>
 
@@ -53,7 +61,12 @@
             <div class="form-group">
               <label for="telefone" class="form-label">Telefone</label>
               <input type="text" th:field="*{telefone}" id="telefone" class="form-input"
-                     placeholder="(41) 99999-9999" />
+                     placeholder="DDD + número"
+                     inputmode="numeric"
+                     pattern="[0-9]{10,11}"
+                     title="Informe DDD + número (10 ou 11 dígitos)"
+                     oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                     maxlength="11" />
             </div>
           </div>
 
@@ -61,12 +74,17 @@
             <div class="form-group">
               <label for="idade" class="form-label">Idade</label>
               <input type="number" th:field="*{idade}" id="idade" class="form-input"
-                     placeholder="Ex: 28" min="16" />
+                     placeholder="Ex: 28" min="16" max="100" />
             </div>
             <div class="form-group">
               <label for="cep" class="form-label">CEP</label>
               <input type="text" th:field="*{cep}" id="cep" class="form-input"
-                     placeholder="00000-000" />
+                     placeholder="Somente números"
+                     inputmode="numeric"
+                     pattern="[0-9]{8}"
+                     title="O CEP deve ter 8 dígitos"
+                     oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                     maxlength="8" />
             </div>
           </div>
 

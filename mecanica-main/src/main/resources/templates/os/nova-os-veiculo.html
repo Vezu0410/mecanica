@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova OS • Garagem AutoBot</title>
+  <link rel="stylesheet" th:href="@{/css/global.css}" />
+  <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <style>
+    /* Card de contexto travado (cliente + veículo já definidos) */
+    .contexto-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+    .contexto-linha {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.92rem;
+      padding: 5px 0;
+    }
+    .contexto-linha .lbl {
+      color: var(--fg-dim);
+      min-width: 70px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .contexto-linha strong { color: var(--fg); }
+    .contexto-placa {
+      font-family: var(--font-mono, monospace);
+      background: var(--surface-3);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+    .contexto-trocar {
+      font-size: 0.78rem;
+      color: var(--accent);
+      text-decoration: none;
+      margin-top: 8px;
+      display: inline-block;
+    }
+    .contexto-trocar:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <div class="form-page-wrapper" style="align-items:flex-start;">
+    <div class="form-card" style="max-width:620px;">
+
+      <div class="form-card-header">
+        <div class="page-eyebrow">Ordens de Serviço</div>
+        <div class="form-card-title">Nova Ordem de Serviço</div>
+        <div class="form-card-subtitle">Abertura rápida para o veículo selecionado</div>
+      </div>
+
+      <!-- Contexto travado: cliente e veículo já vêm definidos -->
+      <div class="contexto-card">
+        <div class="contexto-linha">
+          <span class="lbl">Cliente</span>
+          <strong th:text="${veiculo.cliente != null ? veiculo.cliente.nome : 'Sem cliente'}">Cliente</strong>
+        </div>
+        <div class="contexto-linha">
+          <span class="lbl">Veículo</span>
+          <strong th:text="${veiculo.marca + ' ' + veiculo.modelo}">Marca Modelo</strong>
+          <span class="contexto-placa" th:text="${veiculo.placa}">ABC1234</span>
+          <span th:if="${veiculo.ano != null}" class="text-muted text-sm" th:text="'· ' + ${veiculo.ano}">· 2020</span>
+        </div>
+        <a th:href="@{/os/nova}" class="contexto-trocar">↔ Não é esse? Trocar veículo/cliente</a>
+      </div>
+
+      <!-- Form: só descrição e observações. veiculoId vai no hidden -->
+      <form th:action="@{/os/abrir/veiculo-existente}" method="post">
+        <input type="hidden" name="veiculoId" th:value="${veiculo.id}" />
+
+        <div class="form-body">
+          <div class="form-group">
+            <label class="form-label">
+              Descrição do Problema / Serviço <span style="color:var(--red);">*</span>
+            </label>
+            <textarea name="descricaoProblema" class="form-input" rows="3"
+                      placeholder="Ex: Troca de pastilhas de freio dianteiras, barulho ao frear..."
+                      required style="resize:vertical;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Observações Internas (opcional)</label>
+            <textarea name="observacoes" class="form-input" rows="2"
+                      placeholder="Notas internas do mecânico..."
+                      style="resize:vertical;"></textarea>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <a th:href="@{/menu}" class="btn btn-ghost">← Cancelar</a>
+          <button type="submit" class="btn btn-primary">Abrir OS</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
+
+</body>
+</html>

@@ -923,3 +923,102 @@ body {
 .mb-2        { margin-bottom: 8px; }
 .mb-3        { margin-bottom: 16px; }
 .w-full      { width: 100%; }
+
+/* ============================================================
+   COMPONENTE: SEARCHABLE SELECT (combo com busca)
+   ============================================================ */
+
+.ss-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Campo de texto que o usuário digita para buscar */
+.ss-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  outline: none;
+  transition: var(--transition);
+  cursor: text;
+}
+
+.ss-input:focus {
+  border-color: var(--accent);
+  background: var(--surface-3);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.ss-input::placeholder { color: var(--fg-dim); }
+
+/* Ícone de seta / lupa à direita */
+.ss-wrapper::after {
+  content: '🔍';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Lista de opções que abre abaixo */
+.ss-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border-h);
+  border-radius: var(--radius-sm);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: var(--shadow-md);
+}
+
+.ss-dropdown.open { display: block; }
+
+.ss-option {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--fg);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+
+.ss-option:last-child { border-bottom: none; }
+
+.ss-option:hover,
+.ss-option.highlighted {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.ss-option.selected {
+  background: var(--surface-3);
+  font-weight: 600;
+}
+
+/* Mensagem quando nada é encontrado */
+.ss-empty {
+  padding: 14px;
+  text-align: center;
+  color: var(--fg-dim);
+  font-size: 0.85rem;
+}
+
+/* Destaque do texto que casou com a busca */
+.ss-option mark {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+}

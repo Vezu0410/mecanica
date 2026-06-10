@@ -68,6 +68,12 @@ public class FuncionarioService {
 
         if (funcionarioOpt.isPresent()) {
             Funcionario f = funcionarioOpt.get();
+
+            // Funcionário inativo não pode logar
+            if (!f.isAtivo()) {
+                return Optional.empty();
+            }
+
             // Compara a senha digitada com o hash salvo
             if (passwordEncoder.matches(senhaDigitada, f.getSenha())) {
                 return funcionarioOpt;
@@ -80,6 +86,16 @@ public class FuncionarioService {
         return senha.startsWith("$2a$") || senha.startsWith("$2b$") || senha.startsWith("$2y$");
     }
 
+    // Lista apenas funcionários ATIVOS
+    public List<Funcionario> listarAtivos() {
+        return funcionarioRepository.findByAtivoTrue();
+    }
+
+    // Lista apenas funcionários INATIVOS (para reativar)
+    public List<Funcionario> listarInativos() {
+        return funcionarioRepository.findByAtivoFalse();
+    }
+
     public List<Funcionario> listarTodos() {
         return funcionarioRepository.findAll();
     }
@@ -88,7 +104,42 @@ public class FuncionarioService {
         return funcionarioRepository.findById(id);
     }
 
-    public void deletarPorId(Long id) {
-        funcionarioRepository.deleteById(id);
+    /**
+     * INATIVAÇÃO (soft delete) de funcionário, com travas de segurança:
+     * - Não pode inativar a si mesmo (evita se trancar para fora)
+     * - Não pode inativar o último admin ativo (sistema sem admin)
+     *
+     * @param id          funcionário a inativar
+     * @param idLogado    id do funcionário que está fazendo a ação
+     */
+    public void inativar(Long id, Long idLogado) {
+        Funcionario funcionario = funcionarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado: " + id));
+
+        // Trava 1: não pode inativar a si mesmo
+        if (idLogado != null && idLogado.equals(id)) {
+            throw new IllegalStateException("Você não pode inativar o seu próprio usuário.");
+        }
+
+        // Trava 2: não pode inativar o último admin ativo
+        if (funcionario.isAdmin()) {
+            long adminsAtivos = funcionarioRepository.countByPapelAndAtivoTrue(
+                    com.garageautobot.garagemautobot.entities.PapelFuncionario.ADMIN);
+            if (adminsAtivos <= 1) {
+                throw new IllegalStateException(
+                    "Não é possível inativar o único administrador ativo do sistema. " +
+                    "Promova outro funcionário a administrador antes.");
+            }
+        }
+
+        funcionario.setAtivo(false);
+        funcionarioRepository.save(funcionario);
+    }
+
+    public void reativar(Long id) {
+        Funcionario funcionario = funcionarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado: " + id));
+        funcionario.setAtivo(true);
+        funcionarioRepository.save(funcionario);
     }
 }

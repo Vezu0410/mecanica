@@ -72,13 +72,13 @@
     </div>
 
     <!-- Cards Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;">
+    <div id="cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;">
 
       <div th:each="veiculo : ${veiculos}"
            th:with="statusNome=${veiculo.status.name()}"
            th:classappend="${statusNome == 'EM_MANUTENCAO'} ? 'status-manutencao' :
                             (${statusNome == 'AGUARDANDO_PECA'} ? 'status-aguardando' : 'status-finalizado')"
-           class="veiculo-card">
+           class="veiculo-card" draggable="true">
 
         <div class="veiculo-card-top">
           <div>
@@ -120,7 +120,7 @@
 
         <!-- Ações: abrir OS, ver fotos, editar -->
         <div class="veiculo-card-footer">
-          <a th:href="@{/os/nova}" class="btn btn-blue btn-sm" style="flex:1; justify-content:center;">
+          <a th:href="@{'/os/nova/' + ${veiculo.id}}" class="btn btn-blue btn-sm" style="flex:1; justify-content:center;">
             📋 Nova OS
           </a>
           <a th:href="@{'/fotos/veiculo/' + ${veiculo.id}}" class="btn btn-ghost btn-sm" title="Fotos">📷</a>
@@ -144,6 +144,87 @@
 
     </div>
   </div>
+
+  <style>
+    /* Feedback visual do arrastar-e-soltar */
+    .veiculo-card[draggable="true"] { cursor: grab; }
+    .veiculo-card.dragging {
+      opacity: 0.4;
+      cursor: grabbing;
+      transform: scale(0.98);
+    }
+    .veiculo-card.drag-over {
+      outline: 2px dashed var(--accent);
+      outline-offset: 3px;
+    }
+    /* Evita que botões/links dentro do card disparem o arraste sem querer */
+    .veiculo-card a, .veiculo-card button, .veiculo-card select, .veiculo-card form {
+      cursor: auto;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const grid = document.getElementById('cards-grid');
+      if (!grid) return;
+
+      let cardArrastado = null;
+
+      // Não iniciar arraste se o clique começou num controle interativo
+      grid.querySelectorAll('.veiculo-card').forEach(card => {
+
+        card.addEventListener('dragstart', function (e) {
+          // Se o alvo do mouse for um link/botão/select, cancela o arraste
+          const alvo = e.target;
+          if (alvo.closest('a, button, select, form, .options-wrapper')) {
+            e.preventDefault();
+            return;
+          }
+          cardArrastado = card;
+          card.classList.add('dragging');
+        });
+
+        card.addEventListener('dragend', function () {
+          card.classList.remove('dragging');
+          grid.querySelectorAll('.veiculo-card').forEach(c => c.classList.remove('drag-over'));
+          cardArrastado = null;
+        });
+
+        card.addEventListener('dragover', function (e) {
+          e.preventDefault(); // necessário para permitir o drop
+          if (card !== cardArrastado) {
+            card.classList.add('drag-over');
+          }
+        });
+
+        card.addEventListener('dragleave', function () {
+          card.classList.remove('drag-over');
+        });
+
+        card.addEventListener('drop', function (e) {
+          e.preventDefault();
+          card.classList.remove('drag-over');
+          if (!cardArrastado || card === cardArrastado) return;
+
+          // Decide se insere antes ou depois, conforme a posição do mouse
+          const rect = card.getBoundingClientRect();
+          const meioHorizontal = rect.left + rect.width / 2;
+          const meioVertical   = rect.top + rect.height / 2;
+
+          // Para grade, usa a posição relativa ao centro do card alvo
+          const soltarDepois = (e.clientY > meioVertical) ||
+                               (Math.abs(e.clientY - meioVertical) < rect.height / 2 && e.clientX > meioHorizontal);
+
+          if (soltarDepois) {
+            card.parentNode.insertBefore(cardArrastado, card.nextSibling);
+          } else {
+            card.parentNode.insertBefore(cardArrastado, card);
+          }
+        });
+
+      });
+    })();
+  </script>
 
 </body>
 </html>

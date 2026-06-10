@@ -4,6 +4,7 @@ import com.garageautobot.garagemautobot.entities.OrdemServico;
 import com.garageautobot.garagemautobot.entities.StatusOS;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,4 +36,15 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
         ORDER BY o.dataAbertura DESC
         """)
     List<OrdemServico> buscarPorTermo(String termo);
+
+    // Busca as OS ATIVAS de um veículo (não concluídas nem canceladas),
+    // da mais recente para a mais antiga. Usado para sincronizar o status
+    // quando o veículo é alterado pelo painel.
+    @Query("""
+        SELECT o FROM OrdemServico o
+        WHERE o.veiculo.id = :veiculoId
+          AND o.status NOT IN ('CONCLUIDA', 'CANCELADA')
+        ORDER BY o.dataAbertura DESC
+        """)
+    List<OrdemServico> findOSAtivasDoVeiculo(@Param("veiculoId") Long veiculoId);
 }

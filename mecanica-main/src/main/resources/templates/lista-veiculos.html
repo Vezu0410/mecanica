@@ -9,7 +9,7 @@
 </head>
 <body>
 
-  <div th:replace="fragments/sidebar :: sidebar"></div>
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
   <div th:replace="~{fragments/mobile-nav :: mobile-nav}"></div>
 
   <div class="main-content">
@@ -22,6 +22,9 @@
       </div>
       <a href="/veiculos/cadastro" class="btn btn-primary">+ Novo Veículo</a>
     </div>
+
+    <div th:if="${sucesso}" class="alert alert-success" style="margin-bottom:16px;" th:text="${sucesso}"></div>
+    <div th:if="${erro}"    class="alert alert-error"   style="margin-bottom:16px;" th:text="${erro}"></div>
 
     <div class="table-wrapper">
       <table class="data-table">
@@ -61,7 +64,14 @@
             </td>
             <td th:text="${veiculo.cliente.nome}"></td>
             <td>
-              <a th:href="@{'/veiculos/editar/' + ${veiculo.id}}" class="btn btn-ghost btn-sm">✏ Editar</a>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <a th:href="@{'/fotos/veiculo/' + ${veiculo.id}}" class="btn btn-blue btn-sm">📷 Fotos</a>
+                <a th:href="@{'/veiculos/editar/' + ${veiculo.id}}" class="btn btn-ghost btn-sm">✏ Editar</a>
+                <form th:action="@{'/veiculos/inativar/' + ${veiculo.id}}" method="post"
+                      onsubmit="return confirm('Inativar este veículo? Ele sairá das listas e do painel, mas o histórico de OS e fotos será preservado.')">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Inativar">🗑</button>
+                </form>
+              </div>
             </td>
           </tr>
           <tr th:if="${#lists.isEmpty(veiculos)}">
@@ -71,6 +81,34 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- ════════ VEÍCULOS INATIVOS (somente ADMIN) ════════ -->
+    <div th:if="${session.usuarioLogado != null and session.usuarioLogado.admin and !#lists.isEmpty(veiculosInativos)}"
+         style="margin-top:32px;">
+      <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700;
+                  text-transform:uppercase; letter-spacing:0.04em; color:var(--fg-muted); margin-bottom:12px;">
+        🗄️ Veículos Inativos
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr><th>Veículo</th><th>Placa</th><th>Cliente</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="v : ${veiculosInativos}" style="opacity:0.6;">
+              <td th:text="${v.marca + ' ' + v.modelo}"></td>
+              <td th:text="${v.placa}"></td>
+              <td th:text="${v.cliente != null ? v.cliente.nome : '—'}"></td>
+              <td>
+                <form th:action="@{'/veiculos/reativar/' + ${v.id}}" method="post">
+                  <button type="submit" class="btn btn-success btn-sm">↩ Reativar</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="text-muted text-sm mt-3">

@@ -35,6 +35,10 @@ public class Veiculo {
 
     private LocalDate dataCadastro = LocalDate.now();
 
+    // Soft delete: veículo inativo some das listas mas preserva histórico de OS/fotos
+    @Column(nullable = false)
+    private boolean ativo = true;
+
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
@@ -91,4 +95,7 @@ public class Veiculo {
 
     public Cliente getCliente() { return cliente; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
+
+    public boolean isAtivo() { return ativo; }
+    public void setAtivo(boolean ativo) { this.ativo = ativo; }
 }

@@ -6,6 +6,7 @@
   <title>Veículo • Mecanikas</title>
   <link rel="stylesheet" th:href="@{/css/global.css}" />
   <link rel="stylesheet" th:href="@{/css/mobile.css}" />
+  <link rel="stylesheet" th:href="@{/css/searchable-select.css}" />
 </head>
 <body>
 
@@ -42,11 +43,20 @@
           <div class="form-grid">
             <div class="form-group">
               <label class="form-label">Ano</label>
-              <input type="text" th:field="*{ano}" class="form-input" placeholder="2020" maxlength="4" required />
+              <input type="text" th:field="*{ano}" class="form-input" placeholder="2020"
+                     maxlength="4" inputmode="numeric"
+                     pattern="(19|20)[0-9]{2}"
+                     title="Informe um ano válido com 4 dígitos (ex: 2020)"
+                     oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                     required />
             </div>
             <div class="form-group">
               <label class="form-label">Placa</label>
-              <input type="text" th:field="*{placa}" class="form-input" placeholder="ABC1234" maxlength="7"
+              <input type="text" th:field="*{placa}" class="form-input" placeholder="ABC1234 ou ABC1D23"
+                     maxlength="7"
+                     pattern="[A-Za-z]{3}[0-9][0-9A-Za-z][0-9]{2}"
+                     title="Formato antigo (ABC1234) ou Mercosul (ABC1D23)"
+                     oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')"
                      style="text-transform:uppercase;" required />
             </div>
           </div>
@@ -62,27 +72,36 @@
             </div>
             <div class="form-group">
               <label class="form-label">Cliente</label>
-              <select th:field="*{cliente.id}" class="form-select" required>
-                <option value="" disabled>Selecione um cliente…</option>
-                <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome}"></option>
-              </select>
+              <!-- Combo com busca: digite para filtrar -->
+              <div class="ss-wrapper"
+                   data-ss-required="true"
+                   th:attr="data-ss-options=${clientesJson}">
+                <input type="text" class="ss-input" autocomplete="off"
+                       placeholder="Digite para buscar o cliente..." />
+                <input type="hidden" name="cliente.id" th:value="${veiculo.cliente != null} ? ${veiculo.cliente.id} : ''" />
+                <div class="ss-dropdown"></div>
+              </div>
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label">Peça Utilizada (opcional)</label>
-            <select name="peca.id" class="form-select">
-              <option value="">Nenhuma peça no momento</option>
-              <option th:each="peca : ${pecas}" th:value="${peca.id}"
-                      th:text="${peca.nome + ' — ' + peca.quantidade + ' unid.'}"></option>
-            </select>
+            <!-- Combo com busca: peça é opcional aqui -->
+            <div class="ss-wrapper"
+                 data-ss-required="false"
+                 th:attr="data-ss-options=${pecasJson}">
+              <input type="text" class="ss-input" autocomplete="off"
+                     placeholder="Digite para buscar uma peça..." />
+              <input type="hidden" name="peca.id" value="" />
+              <div class="ss-dropdown"></div>
+            </div>
           </div>
 
           <div class="form-group">
             <label class="form-label">Foto do Veículo</label>
             <input type="file" name="foto" class="form-input" accept="image/*" />
             <div th:if="${veiculo.caminhoFoto != null}" style="margin-top: 10px;">
-              <img th:src="@{'/uploads/veiculos/' + ${veiculo.caminhoFoto}}"
+              <img th:src="@{'/veiculos/foto/' + ${veiculo.caminhoFoto}}"
                    alt="Foto atual" style="max-width:200px; border-radius:var(--radius); border:1px solid var(--border);" />
             </div>
           </div>
@@ -97,5 +116,6 @@
       </form>
     </div>
   </div>
+  <script th:src="@{/js/searchable-select.js}"></script>
 </body>
 </html>

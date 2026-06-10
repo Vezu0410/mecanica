@@ -38,14 +38,15 @@
             <th>Cidade</th>
             <th>Cadastro</th>
             <th>Status</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          <tr th:each="cliente : ${clientes}"
-              class="clickable"
-              th:onclick="'window.location.href=\'/clientes/editar/' + ${cliente.id} + '\';'">
+          <tr th:each="cliente : ${clientes}">
             <td>
-              <span style="font-weight:600;" th:text="${cliente.nome}"></span>
+              <a th:href="@{'/clientes/editar/' + ${cliente.id}}"
+                 style="font-weight:600; color:var(--fg); text-decoration:none;"
+                 th:text="${cliente.nome}"></a>
             </td>
             <td>
               <span class="text-muted text-sm" th:text="${cliente.cpf}"></span>
@@ -63,14 +64,51 @@
               <span th:if="${cliente.ativo}"  class="badge badge-green">Ativo</span>
               <span th:if="${!cliente.ativo}" class="badge badge-red">Inativo</span>
             </td>
+            <td>
+              <div style="display:flex; gap:6px;">
+                <a th:href="@{'/clientes/editar/' + ${cliente.id}}" class="btn btn-ghost btn-sm" title="Editar">✏</a>
+                <form th:action="@{'/clientes/inativar/' + ${cliente.id}}" method="post"
+                      onsubmit="return confirm('Inativar este cliente? Ele sairá das listas, mas o histórico será preservado.')">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Inativar">🗑</button>
+                </form>
+              </div>
+            </td>
           </tr>
           <tr th:if="${#lists.isEmpty(clientes)}">
-            <td colspan="7" style="text-align:center; padding:40px; color:var(--fg-muted);">
+            <td colspan="8" style="text-align:center; padding:40px; color:var(--fg-muted);">
               Nenhum cliente cadastrado ainda.
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- ════════ CLIENTES INATIVOS (somente ADMIN) ════════ -->
+    <div th:if="${session.usuarioLogado != null and session.usuarioLogado.admin and !#lists.isEmpty(clientesInativos)}"
+         style="margin-top:32px;">
+      <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700;
+                  text-transform:uppercase; letter-spacing:0.04em; color:var(--fg-muted); margin-bottom:12px;">
+        🗄️ Clientes Inativos
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr><th>Nome</th><th>CPF</th><th>Telefone</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="c : ${clientesInativos}" style="opacity:0.6;">
+              <td th:text="${c.nome}"></td>
+              <td><span class="text-muted text-sm" th:text="${c.cpf}"></span></td>
+              <td><span class="text-muted text-sm" th:text="${c.telefone}"></span></td>
+              <td>
+                <form th:action="@{'/clientes/reativar/' + ${c.id}}" method="post">
+                  <button type="submit" class="btn btn-success btn-sm">↩ Reativar</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="text-muted text-sm mt-3">

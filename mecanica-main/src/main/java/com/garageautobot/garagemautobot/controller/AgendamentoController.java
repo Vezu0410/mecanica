@@ -69,10 +69,18 @@ public class AgendamentoController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             Model model) {
 
-        model.addAttribute("clientes", clienteRepository.findAll());
+        var clientes = clienteRepository.findAll();
+        model.addAttribute("clientes", clientes);
         model.addAttribute("veiculos", veiculoRepository.findAll());
         model.addAttribute("periodos", PeriodoAgendamento.values());
         model.addAttribute("dataPreenchida", data != null ? data : LocalDate.now());
+
+        // JSON do combo de cliente com busca
+        model.addAttribute("clientesJson", ComboJson.gerar(
+                clientes,
+                Cliente::getId,
+                Cliente::getNome
+        ));
         return "agenda/novo-agendamento";
     }
 

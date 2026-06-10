@@ -11,11 +11,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -25,10 +27,9 @@ public class VeiculoController {
     private final VeiculoService veiculoService;
     private final ClienteRepository clienteRepository;
 
-
     @Autowired
-    private PecaService pecaService; // 🔹 Adicionado
-    
+    private PecaService pecaService;
+
     @Autowired
     public VeiculoController(VeiculoService veiculoService, ClienteRepository clienteRepository) {
         this.veiculoService = veiculoService;
@@ -38,9 +39,8 @@ public class VeiculoController {
     // Exibir formulário de cadastro (novo veículo)
     @GetMapping("/cadastro")
     public String exibirFormularioCadastro(Model model) {
-        model.addAttribute("veiculo", new Veiculo()); // Veículo novo
-        model.addAttribute("clientes", clienteRepository.findAll());
-        model.addAttribute("pecas", pecaService.findAll());
+        model.addAttribute("veiculo", new Veiculo());
+        carregarCombos(model);
         return "cadastro-veiculo";
     }
 
@@ -50,9 +50,8 @@ public class VeiculoController {
         Veiculo veiculo = veiculoService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Veículo não encontrado"));
         model.addAttribute("veiculo", veiculo);
-        model.addAttribute("clientes", clienteRepository.findAll());
-        model.addAttribute("pecas", pecaService.findAll()); // 🔹 Aqui também
-        return "cadastro-veiculo"; // mesma página do cadastro
+        carregarCombos(model);
+        return "cadastro-veiculo";
     }
 
     // Salvar veículo (novo ou editado)
@@ -60,13 +59,12 @@ public class VeiculoController {
     public String salvar(@ModelAttribute Veiculo veiculo,
                          @RequestParam("foto") MultipartFile foto) throws IOException {
 
-        // Se o usuário enviou uma foto
         if (!foto.isEmpty()) {
             String filename = UUID.randomUUID() + "_" + foto.getOriginalFilename();
             Path caminho = Paths.get("uploads/veiculos/" + filename);
             Files.createDirectories(caminho.getParent());
             Files.write(caminho, foto.getBytes());
-            veiculo.setCaminhoFoto(filename); // <-- garante que Veiculo tenha este atributo
+            veiculo.setCaminhoFoto(filename);
         }
 
         veiculoService.save(veiculo);
@@ -77,10 +75,35 @@ public class VeiculoController {
     @GetMapping("/lista")
     public String listarTodos(Model model) {
         model.addAttribute("veiculos", veiculoService.findAll());
+        model.addAttribute("veiculosInativos", veiculoService.findInativos());
         return "lista-veiculos";
     }
-    
- // Exibir foto do veículo
+
+    // INATIVAR veículo (soft delete, com trava de OS em aberto)
+    @PostMapping("/inativar/{id}")
+    public String inativar(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            veiculoService.inativar(id);
+            ra.addFlashAttribute("sucesso", "Veículo inativado. O histórico de OS e fotos foi preservado.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", e.getMessage());
+        }
+        return "redirect:/veiculos/lista";
+    }
+
+    // REATIVAR veículo (somente admin - protegido no WebConfig)
+    @PostMapping("/reativar/{id}")
+    public String reativar(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            veiculoService.reativar(id);
+            ra.addFlashAttribute("sucesso", "Veículo reativado com sucesso!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", e.getMessage());
+        }
+        return "redirect:/veiculos/lista";
+    }
+
+    // Exibir foto do veículo
     @GetMapping("/foto/{filename:.+}")
     @ResponseBody
     public byte[] exibirFoto(@PathVariable String filename) throws IOException {
@@ -88,4 +111,28 @@ public class VeiculoController {
         return Files.readAllBytes(caminho);
     }
 
+    // ── Helper: carrega clientes/peças e gera o JSON do combo com busca ──
+    private void carregarCombos(Model model) {
+        List<Cliente> clientes = clienteRepository.findAll();
+        var pecas = pecaService.findAll();
+
+        model.addAttribute("clientes", clientes);
+        model.addAttribute("pecas", pecas);
+
+        // JSON consumido pelo componente searchable-select (combo de cliente)
+        String clientesJson = ComboJson.gerar(
+                clientes,
+                Cliente::getId,
+                Cliente::getNome
+        );
+        model.addAttribute("clientesJson", clientesJson);
+
+        // JSON do combo de peças: "Nome (Cód: X — Estq: Y)"
+        String pecasJson = ComboJson.gerar(
+                pecas,
+                p -> p.getId(),
+                p -> p.getNome() + " (Cód: " + p.getCodigo() + " — Estq: " + p.getQuantidade() + ")"
+        );
+        model.addAttribute("pecasJson", pecasJson);
+    }
 }

@@ -22,7 +22,9 @@
     <a th:href="@{/clientes/listar}" class="sidebar-link"><span class="sidebar-link-icon">👤</span> Clientes</a>
     <a th:href="@{/veiculos/lista}" class="sidebar-link"><span class="sidebar-link-icon">🚗</span> Veículos</a>
     <a th:href="@{/pecas/lista}" class="sidebar-link"><span class="sidebar-link-icon">⚙️</span> Estoque</a>
-    <a th:href="@{/funcionarios/cadastrar}" class="sidebar-link"><span class="sidebar-link-icon">👷</span> Funcionários</a>
+    <a th:href="@{/funcionarios/listar}" class="sidebar-link"><span class="sidebar-link-icon">👷</span> Funcionários</a>
+    <a th:if="${session.usuarioLogado != null and session.usuarioLogado.admin}"
+       th:href="@{/backup}" class="sidebar-link"><span class="sidebar-link-icon">💾</span> Backup</a>
 
     <span class="sidebar-section-label">Relatórios</span>
     <a th:href="@{/relatorios}" class="sidebar-link"><span class="sidebar-link-icon">📊</span> Relatórios</a>
